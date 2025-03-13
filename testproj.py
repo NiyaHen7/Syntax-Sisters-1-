@@ -44,12 +44,19 @@ class Professors(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
-class Reviews(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  # review_id
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     professor_id = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.Text, nullable=True)
+    review = db.Column(db.Text, nullable=False)  # Actual review text
+    created_at = db.Column(db.TIMESTAMP, server_default=db.func.now(), nullable=False)
+    class_format = db.Column(db.Text, nullable=True)  # Online/In-person/etc.
+    sql_score = db.Column(db.Integer, nullable=True)  # Score out of X
+    
+    # Relationships (optional, for easier access)
+    user = db.relationship('User', backref=db.backref('reviews', lazy=True))
+    professor = db.relationship('Professor', backref=db.backref('reviews', lazy=True))
+
 
 # Create tables explicitly in app context (only run once on startup)
 with app.app_context():
@@ -112,18 +119,28 @@ def add_professor():
 
 @app.route('/add_review', methods=['POST'])
 def add_review():
-    user_id = session.get('user_id')
-    if not user_id:
-        return "Unauthorized", 403
-
+    user_id = request.form['user_id']
     professor_id = request.form['professor_id']
-    rating = request.form['rating']
-    comment = request.form.get('comment', '')
-
-    new_review = Review(user_id=user_id, professor_id=professor_id, rating=rating, comment=comment)
+    review_text = request.form['review']
+    class_format = request.form.get('class_format', None)  # Optional
+    sql_score = request.form.get('sql_score', None)  # Optional
+    
+    # Convert score to int if provided
+    sql_score = int(sql_score) if sql_score else None
+    
+    new_review = Review(
+        user_id=user_id, 
+        professor_id=professor_id, 
+        review=review_text, 
+        class_format=class_format, 
+        sql_score=sql_score
+    )
+    
     db.session.add(new_review)
     db.session.commit()
+    
     return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
