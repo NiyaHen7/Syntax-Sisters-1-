@@ -13,36 +13,31 @@ from flask import Flask, render_template, request, redirect, url_for
 import time, subprocess
 
 app = Flask(__name__,template_folder="templates")
-
+# this may need to be changed
 node_script = '/Users/owner/Syntax-Sisters-1--1/app.js'
 
 # GET is to requeset data from a resource
 # POST is to send data/update
-# we want to run the python file "python webscraping.py"
 
-# Blackboard login credentials (replace with actual login details)
-USERNAME = ""
-PASSWORD = ""
-# then we want to load the homepage, the user will enter a correct
-# username and password and click submit
-
+# this renders the login page when the python function is ran
 @app.route('/')
 def index():
     return render_template('homepage.html')
 
+# from here we recieve the login from the form with 
+# the method "POST"
 @app.route('/fetch_login', methods=['POST'])
 def fetch_login():
     if request.method == 'POST': 
         user_name = request.form['username']
         user_password = request.form['password']
-        #print(USERNAME,PASSWORD)
-    print(user_name,user_password)
-    #print("<p>Password: " + PASSWORD + "</p>")
+    
+    # we then store the information and send it to
+    # the handle data function where the existing 
+    # web scraping function exists
     return redirect(url_for("handle_data", username=user_name, password=user_password))
 
-print(USERNAME)
-print("<p>Password: " + PASSWORD + "</p>")
-
+# the methods GET & POST allows this function to send & recieve information
 @app.route('/handle_data/<username>/<password>', methods=['GET', 'POST'])
 def handle_data(username=None, password=None):
     driver = webdriver.Chrome() # Ensure you have the correct ChromeDriver
@@ -95,7 +90,7 @@ def handle_data(username=None, password=None):
     print("Extraction complete! Check professors.txt")
 
     driver.quit()
-    #start app.js
+    #start page with professors to view and student profile
     subprocess.Popen(['node', node_script])
     return render_template('index.html')
 
