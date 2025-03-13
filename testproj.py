@@ -44,7 +44,7 @@ class Professors(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
-class Review(db.Model):
+class Reviews(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # review_id
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     professor_id = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
@@ -64,7 +64,7 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    professors = Professor.query.all()
+    professors = Professors.query.all()
     return render_template('index.html', professors=professors)
 
 @app.route('/register', methods=['POST'])
@@ -73,11 +73,11 @@ def register():
     email = request.form['email']
     password = request.form['password']
 
-    existing_user = User.query.filter_by(email=email).first()
+    existing_user = Users.query.filter_by(email=email).first()
     if existing_user:
         return "Email already exists!", 400
 
-    new_user = User(name=name, email=email)
+    new_user = Users(name=name, email=email)
     new_user.set_password(password)  # Hash password before storing
     db.session.add(new_user)
     db.session.commit()
@@ -112,7 +112,7 @@ def dashboard():
 @app.route('/add_professor', methods=['POST'])
 def add_professor():
     name = request.form['name']
-    new_professor = Professor(name=name)
+    new_professor = Professors(name=name)
     db.session.add(new_professor)
     db.session.commit()
     return redirect(url_for('index'))
@@ -128,7 +128,7 @@ def add_review():
     # Convert score to int if provided
     sql_score = int(sql_score) if sql_score else None
     
-    new_review = Review(
+    new_review = Reviews(
         user_id=user_id, 
         professor_id=professor_id, 
         review=review_text, 
