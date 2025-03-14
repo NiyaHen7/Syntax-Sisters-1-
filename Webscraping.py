@@ -11,19 +11,30 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 import os
+import time
+from dotenv import load_dotenv
+from flask_migrate import Migrate
+from sqlalchemy.sql import text
+
+
+load_dotenv()  # Load environment variables from .env
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+print(f"Loaded DATABASE_URL: {DATABASE_URL}")  # Debugging check
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)  # Secure sessions
 
-# Configure the PostgreSQL database (use environment variable for security)
+# Configure the PostgreSQL database
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost/school_reviews')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Define Database Models
 class Users(db.Model):
@@ -32,13 +43,19 @@ class Users(db.Model):
     username = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 class Professors(db.Model):
     __tablename__ = 'professors'
     professor_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    professor_type = db.Column(db.String(255), nullable=False)  # Ensure this matches DB
-
-# Ensure tables exist
+    professor_type = db.Column(db.String(255), nullable=False)
+                                
+# Create tables explicitly in app context
 with app.app_context():
     db.create_all()
 
@@ -46,13 +63,14 @@ with app.app_context():
 def index():
     return render_template('login.html')
 
+
 @app.route('/fetch_login', methods=['POST'])
 def fetch_login():
     if request.method == 'POST': 
         username = request.form['username']
         password = request.form['password']
 
-        # Store hashed password if user does not exist
+        # Check if user already exists
         existing_user = Users.query.filter_by(username=username).first()
         if not existing_user:
             hashed_password = generate_password_hash(password)
@@ -60,9 +78,13 @@ def fetch_login():
             db.session.add(new_user)
             db.session.commit()
 
+    # Fix auto-increment sequence
+        db.session.execute(text("SELECT setval('users_user_id_seq', (SELECT COALESCE(MAX(user_id), 1) FROM users), true);"))
+        db.session.commit()
+
         # Store username in session instead of passing via URL
         session['username'] = username
-        session['password'] = password  # This is NOT recommended for real-world apps. Use a secure authentication system.
+        session['password'] = password  # Not recommended for production!
 
     return redirect(url_for("handle_data"))
 
@@ -84,7 +106,7 @@ def handle_data():
         driver.find_element(By.ID, "password").send_keys(password)
         driver.find_element(By.ID, "entry-login").click()
 
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.CLASS_NAME, "instructors"))
         )
 
@@ -112,7 +134,11 @@ def handle_data():
     finally:
         driver.quit()
 
+
+
+
     return render_template('index.html')
 
 if __name__ == '__main__':
     app.run()
+
