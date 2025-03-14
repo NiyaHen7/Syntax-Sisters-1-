@@ -27,38 +27,39 @@ db = SQLAlchemy(app)
 
 # Define Database Models
 class Users(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    __tablename__ = 'users'
+    user_id = db.Column(db.Integer, primary_key=True)  # Matches PostgreSQL
+    username = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    reviews = db.relationship('Reviews', back_populates='user')
 
     def set_password(self, password):
-        """Hash password before storing"""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        """Verify password during login"""
         return check_password_hash(self.password_hash, password)
 
 class Professors(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    __tablename__ = 'professors'
+    professor_id = db.Column(db.Integer, primary_key=True)  # Matches PostgreSQL
+    name = db.Column(db.String(255), nullable=False)
+    professor_type = db.Column(db.String(255), nullable=False, default="Unknown")  # Matches DB
+    reviews = db.relationship('Reviews', back_populates='professor')
 
 class Reviews(db.Model):
-    id = db.Column(db.Integer, primary_key=True)  # review_id
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    professor_id = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
-    review = db.Column(db.Text, nullable=False)  # Actual review text
-    created_at = db.Column(db.TIMESTAMP, server_default=db.func.now(), nullable=False)
-    class_format = db.Column(db.Text, nullable=True)  # Online/In-person/etc.
-    sql_score = db.Column(db.Integer, nullable=True)  # Score out of X
-    
-    # Relationships (optional, for easier access)
-    user = db.relationship('User', backref=db.backref('reviews', lazy=True))
-    professor = db.relationship('Professor', backref=db.backref('reviews', lazy=True))
+    __tablename__ = 'reviews'
+    review_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)  # Matches DB
+    professor_id = db.Column(db.Integer, db.ForeignKey('professors.professor_id'), nullable=False)  # Matches DB
+    review = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    class_format = db.Column(db.String(255), nullable=True)
+    sql_score = db.Column(db.Integer, nullable=True)
 
+    user = db.relationship('Users', back_populates='reviews')
+    professor = db.relationship('Professors', back_populates='reviews')
 
-# Create tables explicitly in app context (only run once on startup)
+# Create tables explicitly in app context
 with app.app_context():
     db.create_all()
 
@@ -70,15 +71,15 @@ def index():
 @app.route('/register', methods=['POST'])
 def register():
     name = request.form['name']
-    email = request.form['email']
+    username = request.form['username']
     password = request.form['password']
 
-    existing_user = Users.query.filter_by(email=email).first()
+    existing_user = Users.query.filter_by(username=username).first()
     if existing_user:
-        return "Email already exists!", 400
+        return "Username already exists!", 400
 
-    new_user = Users(name=name, email=email)
-    new_user.set_password(password)  # Hash password before storing
+    new_user = Users(username=username)
+    new_user.set_password(password)
     db.session.add(new_user)
     db.session.commit()
 
@@ -86,12 +87,12 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    email = request.form['email']
+    username = request.form['username']
     password = request.form['password']
 
-    user = User.query.filter_by(email=email).first()
+    user = Users.query.filter_by(username=username).first()
     if user and user.check_password(password):
-        session['user_id'] = user.id  # Store user session
+        session['user_id'] = user.user_id
         return redirect(url_for('index'))
     else:
         return "Invalid credentials!", 403
@@ -106,7 +107,7 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('index'))
     
-    user = User.query.get(session['user_id'])
+    user = Users.query.get(session['user_id'])
     return render_template('dashboard.html', user=user)
 
 @app.route('/add_professor', methods=['POST'])
@@ -122,10 +123,9 @@ def add_review():
     user_id = request.form['user_id']
     professor_id = request.form['professor_id']
     review_text = request.form['review']
-    class_format = request.form.get('class_format', None)  # Optional
-    sql_score = request.form.get('sql_score', None)  # Optional
+    class_format = request.form.get('class_format', None)
+    sql_score = request.form.get('sql_score', None)
     
-    # Convert score to int if provided
     sql_score = int(sql_score) if sql_score else None
     
     new_review = Reviews(
@@ -140,7 +140,6 @@ def add_review():
     db.session.commit()
     
     return redirect(url_for('index'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)
