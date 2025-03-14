@@ -28,10 +28,10 @@ db = SQLAlchemy(app)
 # Define Database Models
 class Users(db.Model):
     __tablename__ = 'users'
-    user_id = db.Column(db.Integer, primary_key=True)  # Matches PostgreSQL
-    username = db.Column(db.String(255), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    reviews = db.relationship('Reviews', back_populates='user')
+    reviews = db.relationship('Reviews', back_populates='users')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -107,8 +107,8 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('index'))
     
-    user = Users.query.get(session['user_id'])
-    return render_template('dashboard.html', user=user)
+    users = Users.query.get(session['user_id'])
+    return render_template('dashboard.html', users=users)
 
 @app.route('/add_professor', methods=['POST'])
 def add_professor():
