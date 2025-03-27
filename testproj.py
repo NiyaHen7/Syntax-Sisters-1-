@@ -11,6 +11,11 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os
+from sqlalchemy import create_engine
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:wrocDJvJZYmYShWtBHVFgGemQxKjgtvu@switchyard.proxy.rlwy.net:24131/railway")
+
+engine = create_engine(DATABASE_URL)
 
 # Load environment variables
 load_dotenv()
