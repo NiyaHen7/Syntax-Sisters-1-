@@ -19,6 +19,7 @@ import time
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from sqlalchemy.sql import text
+import testproj
 
 
 load_dotenv()  # Load environment variables from .env
@@ -97,7 +98,7 @@ def handle_data():
         return "Invalid session. Please log in again.", 403
 
     driver = webdriver.Chrome()
-    driver.implicitly_wait(10)  # Replaces time.sleep()
+    driver.implicitly_wait(10)
 
     driver.get("https://blackboard.ncat.edu/ultra/course")
 
@@ -106,7 +107,7 @@ def handle_data():
         driver.find_element(By.ID, "password").send_keys(password)
         driver.find_element(By.ID, "entry-login").click()
 
-        WebDriverWait(driver, 60).until(
+        WebDriverWait(driver, 180).until(
             EC.presence_of_element_located((By.CLASS_NAME, "instructors"))
         )
 
@@ -124,18 +125,31 @@ def handle_data():
             for instructor in instructors:
                 existing_professor = Professors.query.filter_by(name=instructor).first()
                 if not existing_professor:
-                    new_professor = Professors(name=instructor, professor_type="Unknown")  # Adjust based on actual schema
+                    new_professor = Professors(name=instructor, professor_type="Unknown")
                     db.session.add(new_professor)
             db.session.commit()
+        print("Extracted Instructors:", instructors)
 
-        print("Professor data stored successfully!")
+        # Save to a file
+        with open("professors.txt", "w", encoding="utf-8") as f:
+            for instructor in instructors:
+                f.write(f"{instructor}\n")
+
+        print("Extraction complete! Check professors.txt")
+
+        # Get the user_id from the session and call enroll_professors
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            user_id = user.user_id
+            testproj.enroll_professors(user_id) #call the function.
+        else:
+            print("User not found.")
+
     except Exception as e:
         print(f"Error during scraping: {e}")
+
     finally:
         driver.quit()
-
-
-
 
     return render_template('index.html')
 
