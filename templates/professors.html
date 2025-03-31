@@ -3,22 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professors - Rate My Aggie</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Professors List</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Professors List</h1>
-        <div class="professors-container">
-            {% for professor in professors %}
-            <div class="professor-card">
-                <h2>{{ professor.name }}</h2>
-                <p><strong>Department:</strong> {{ professor.department }}</p>
-                <p><strong>School:</strong> {{ professor.school }}</p>
-                <p><strong>Rating:</strong> ⭐ {{ professor.rating }} / 5</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+    <h1>Professors List</h1>
+    <ul>
+        {% for professor in professors %}
+            <li>{{ professor.name }} - {{ professor.professor_type }}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
