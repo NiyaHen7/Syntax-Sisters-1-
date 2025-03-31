@@ -15,7 +15,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 import os
-import time
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from sqlalchemy.sql import text
@@ -64,6 +63,29 @@ with app.app_context():
 def index():
     return render_template('login.html')
 
+
+@app.route('/professors')
+def professors_page():
+    try:
+        # access the database and grab the professors
+        professors = db.session.execute(db.select(Professors)).scalars().all()
+        # then send these professors to the front end
+        return render_template('professors.html', professors=professors)
+    except Exception as e:
+        return f"Something isn't working: {str(e)}"
+
+@app.route('/student-profile')
+def student_profile():
+    try:
+        # we do a similar thing for student
+        # but we will have to filter by the user name 
+        # ( we can filter by the username we recieved from the webscraping)
+        student_profile = db.session.execute(db.select(Users)).scalars().all()
+        ### i will update this code in a bit
+    except Exception as e:
+        # we will also need to update this error message
+        # to be more cohesive
+        return f"Something isn't working: {str(e)}"
 
 @app.route('/fetch_login', methods=['POST'])
 def fetch_login():
