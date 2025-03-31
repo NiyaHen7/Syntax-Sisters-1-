@@ -16,6 +16,8 @@ import psycopg2
 from psycopg2.extras import execute_values
 from selenium import webdriver #add selenium
 from selenium.webdriver.common.by import By #add selenium
+from flask import jsonify
+
 
 # Load environment variables
 load_dotenv()
@@ -75,6 +77,8 @@ class Reviews(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
     class_format = db.Column(db.String(255), nullable=True)
     sql_score = db.Column(db.Integer, nullable=True)
+    status = db.Column(db.String(20), default='pending', nullable=False)
+    auto_flagged = db.Column(db.Boolean, default=False, nullable=False)
 
     user = db.relationship('Users', back_populates='reviews')
     professor = db.relationship('Professors', back_populates='reviews')
@@ -131,6 +135,25 @@ def enroll_professors(user_id):
         cur.close()
         conn.close()
 
+# establish moderators
+MODERATOR_IDS = {19, 20, 21, 22, 23}
+
+def is_moderator(user_id):
+    return user_id in MODERATOR_IDS
+
+# auto moderation features
+flagged_words = {'fuck', 'fucking', 'bitch', 'shit', 'pussy', 'nigga', 'hell'}
+
+def contains_flagged_words(text):
+    return any(word in text.lower() for word in flagged_words)
+
+def moderate_review_automatically(review_content):
+    if contains_flagged_words(review_content):
+        return {'status': 'flagged', 'auto_flagged': True}
+    else:
+        return {'status': 'approved', 'auto_flagged': False}
+
+
 # Routes
 @app.route('/')
 def index():
@@ -178,6 +201,47 @@ def run_enrollment():
     user_id = session['user_id']
     enroll_professors(user_id)
     return "Enrollment completed."
+
+# Delete Review Route 
+@app.route('/delete_review/<int:review_id>', methods=['DELETE'])
+def delete_review(review_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    review = Reviews.query.get(review_id)
+    if not review:
+        return jsonify({'error': 'Review not found'}), 404
+
+    # Check if user is a moderator or the review owner
+    if is_moderator(user_id) or review.user_id == user_id:
+        db.session.delete(review)
+        db.session.commit()
+        return jsonify({'message': 'Review deleted successfully'})
+    else:
+        return jsonify({'error': 'Permission denied'}), 403
+
+# Moderation Route
+@app.route('/submit_review', methods=['POST'])
+def submit_review():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.json
+    review_content = data.get('content', '')
+
+    moderation_result = moderate_review_automatically(review_content)
+
+    review = Reviews(
+        content=review_content,
+        status=moderation_result['status'],
+        auto_flagged=moderation_result['auto_flagged']
+    )
+    db.session.add(review)
+    db.session.commit()
+
+    return jsonify({'message': 'Review submitted', 'status': moderation_result['status']})
 
 # Dashboard
 @app.route('/dashboard')
