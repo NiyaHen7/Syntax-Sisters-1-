@@ -6,7 +6,7 @@
     <title>Rate My Aggie</title>
     <style>
         body {
-            background-color: rgb(81, 81, 229);
+            background-color: #2E58A6; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,38 +20,92 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            width: 90%;
+            max-width: 400px;
         }
         input {
             display: block;
             margin: 10px auto;
-            padding: 10px;
-            width: 80%;
+            padding: 12px;
+            width: 85%;
             border: none;
             border-radius: 5px;
+            background: #1D3C73;
+            color: white;
+            font-size: 16px;
+        }
+        input::placeholder {
+            color: #bbbbbb;
+        }
+        .username-wrapper {
+            display: flex;
+            align-items: center;
+            background: #1D3C73;
+            border-radius: 5px;
+            padding: 12px;
+            width: 85%;
+            margin: 10px auto;
+            color: white;
+        }
+        .username-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+        }
+        .suffix {
+            color: #bbbbbb;
+            margin-left: 5px;
         }
         button {
             padding: 10px 20px;
             border: none;
-            background: white;
-            color: blue;
+            background: black;
+            color: white;
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
+            width: 90%;
         }
         button:hover {
-            background: lightgray;
+            background: #444;
         }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        .banner {
+            width: 100%;
+            background-color: #001F54;
+            color: white;
+            text-align: center;
+            font-size: 32px; 
+            font-weight: bold;
+            padding: 25px 0; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            white-space: nowrap; 
+        }
+
+
     </style>
 </head>
 <body>
-     <h1>Rate My Aggie</h1>
+    <div class="banner">Rate My Aggie</div>
+    <img src="{{ url_for('static', filename='images/Rma.png') }}" alt="RMA Logo" class="logo" style="width: 150px; height: auto;">
     <div class="container">
-        <form  method="post" action="/fetch_login">
-            <input type="text" id="username" name="username" placeholder="Username">
+        <form method="post" action="/fetch_login">
+            <div class="username-wrapper">
+                <input type="text" id="username" name="username" placeholder="Username">
+                <span class="suffix">@aggies.ncat.edu</span>
+            </div>
             <input type="password" id="password" name="password" placeholder="Password">
-            <input type="submit" value="go">
+            <button type="submit">Sign In</button>
         </form>
-        
     </div>
 </body>
 </html>
