@@ -19,7 +19,11 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 from sqlalchemy.sql import text
 import testproj
+from selenium.webdriver.chrome.options import Options
+import logging
 
+
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()  # Load environment variables from .env
 
@@ -35,6 +39,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+
+# Hiding the bb login from the user
+def get_headless_driver():
+    options = Options()
+    options.add_argument("--headless=new")  # Ensures a headless browser
+    options.add_argument("--disable-gpu")  # Required for headless mode in some environments
+    options.add_argument("--window-size=1920x1080")  # Simulate a screen size
+    options.add_argument("--no-sandbox")  # Bypass OS security model if necessary
+    options.add_argument("--disable-dev-shm-usage")  # Prevent memory overflow issues
+    options.add_argument("--log-level=3")  # Suppress unnecessary logs
+
+    driver = webdriver.Chrome(options=options)
+    return driver
 
 # Define Database Models
 class Users(db.Model):
@@ -119,7 +137,7 @@ def handle_data():
     if not username or not password:
         return "Invalid session. Please log in again.", 403
 
-    driver = webdriver.Chrome()
+    driver = get_headless_driver()
     driver.implicitly_wait(10)
 
     driver.get("https://blackboard.ncat.edu/ultra/course")
