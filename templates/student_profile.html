@@ -5,6 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Profile</title>
   <link rel="stylesheet" href="../static/styles.css">
+  <style>
+    /* Profile Content */
+    .main-content {
+      flex: 1;
+      padding: 30px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #004080;
+      text-align: center;
+    }
+
+    .highlight {
+      color: #ffd700;
+    }
+
+    /* Profile Card */
+    .profile-card {
+      background: linear-gradient(135deg, #eef4ff, #dce6ff);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin: 20px auto;
+      max-width: 500px;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .profile-card:hover {
+      transform: scale(1.03);
+    }
+
+    .profile-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #ccc;
+      display: inline-block;
+      margin-bottom: 10px;
+      border: 4px solid #004080;
+    }
+
+    .profile-card p {
+      font-size: 18px;
+      margin: 10px 0;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Profile Sections */
+    .profile-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #eef4ff;
+      border-left: 5px solid #ffd700;
+      border-radius: 10px;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      margin: 20px auto;
+    }
+
+    .profile-section h2 {
+      color: #004080;
+      border-bottom: 3px solid #ffd700;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      font-size: 22px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .profile-card, .profile-section {
+        max-width: 90%;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -20,10 +97,20 @@
 
     <!-- Profile Content -->
     <div class="main-content">
-      <h1>Welcome to Your Profile, <%= student.name %></h1>
-      <p>Email: <%= student.email %></p>
-      <p>Major: <%= student.major %></p>
-      <p>Bio: <%= student.bio %></p>
+      <h1>Welcome to Your Profile, <span class="highlight"><%= student.name %></span></h1>
+      
+      <div class="profile-card">
+        <div class="profile-img"></div>
+        <p><strong>Email:</strong> <%= student.email %></p>
+        <p><strong>Major:</strong> <%= student.major %></p>
+        <p><strong>Graduation Year:</strong> <%= student.grad_year %></p>
+      </div>
+
+      <!-- Expanded Profile Sections -->
+      <div class="profile-section">
+        <h2>Bio</h2>
+        <p><!--bio--></p>
+      </div>
     </div>
   </div>
 </body>
