@@ -90,11 +90,16 @@
     <ul>
       <li><a href="/">Home</a></li>
       <li><a href="/professors">Professors</a></li>
-<li><a href="../student-profile.ejs">Student Profile </a></li>
+      {% if session.get('user_id') and session.get('is_moderator') %}
+        <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+      {% endif %}
+      <li><a href="../student-profile.ejs">Student Profile </a></li>
       <!-- Add more links here if needed -->
     </ul>
   </div>
 
+  
+  
   <!-- Main Content -->
   <div class="main-content">
     <h1>Welcome to Rate My Aggie!</h1>
@@ -103,3 +108,9 @@
   </div>
 </body>
 </html>
+
+<!--
+{% if session.get('user_id') and session.get('is_moderator') %}
+        <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+      {% endif %}
+      -->
