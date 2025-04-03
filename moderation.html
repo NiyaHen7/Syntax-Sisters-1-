@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moderation Panel</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <h1>Moderation Panel</h1>
+  
+  {% if reviews %}
+    <table>
+      <thead>
+        <tr>
+          <th>Review ID</th>
+          <th>User ID</th>
+          <th>Content</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for review in reviews %}
+        <tr>
+          <td>{{ review.review_id }}</td>
+          <td>{{ review.user_id }}</td>
+          <td>{{ review.content }}</td>
+          <td>
+            
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No reported reviews at the moment.</p>
+  {% endif %}
+
+  <script>
+    function moderateReview(reviewId, action) {
+      fetch(`/moderate/${reviewId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: action })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        location.reload(); // Refresh to reflect changes
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+</body>
+</html>
