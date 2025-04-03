@@ -21,6 +21,7 @@ from sqlalchemy.sql import text
 import testproj
 from selenium.webdriver.chrome.options import Options
 import logging
+from flask import jsonify
 
 
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +41,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+@app.route('/session_user')
+def get_session_user():
+    return f"Current session user: {session.get('user', 'No user logged in')}"
+
 
 # Hiding the bb login from the user
 def get_headless_driver():
@@ -55,12 +60,14 @@ def get_headless_driver():
     return driver
 
 # Define Database Models
+
 class Users(db.Model):
     __tablename__ = 'users'
-    user_id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(255), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-
+    moderator = db.Column(db.Boolean, default=False)  # Ensure this line exists
+    reviews = db.relationship('Reviews', back_populates='user')
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -72,7 +79,24 @@ class Professors(db.Model):
     professor_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     professor_type = db.Column(db.String(255), nullable=False)
-                                
+    reviews = db.relationship('Reviews', back_populates='professor')
+
+class Reviews(db.Model):
+    __tablename__ = 'reviews'
+    review_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    professor_id = db.Column(db.Integer, db.ForeignKey('professors.professor_id'), nullable=False)
+    review = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    class_format = db.Column(db.String(255), nullable=True)
+    sql_score = db.Column(db.Integer, nullable=True)
+    status = db.Column(db.String(20), default='pending', nullable=False)
+    auto_flagged = db.Column(db.Boolean, default=False, nullable=False)
+    reported = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('Users', back_populates='reviews')
+    professor = db.relationship('Professors', back_populates='reviews')
+
 # Create tables explicitly in app context
 with app.app_context():
     db.create_all()
@@ -104,6 +128,16 @@ def student_profile():
         # we will also need to update this error message
         # to be more cohesive
         return f"Something isn't working: {str(e)}"
+    
+@app.route('/moderation_page')
+def moderation_page():
+    print(session)  # Print session contents to debug
+    if not session.get('is_moderator'):
+        print("Moderator check failed!")  # Debugging
+        return "Access Denied", 403  
+
+    reported_reviews = db.session.execute(text("SELECT * FROM reviews WHERE reported = True")).fetchall()
+    return render_template('moderation.html', reported_reviews=reported_reviews)
 
 @app.route('/fetch_login', methods=['POST'])
 def fetch_login():
@@ -112,21 +146,25 @@ def fetch_login():
         password = request.form['password']
 
         # Check if user already exists
-        existing_user = Users.query.filter_by(username=username).first()
-        if not existing_user:
+        user = Users.query.filter_by(username=username).first()
+        if not user:
             hashed_password = generate_password_hash(password)
             new_user = Users(username=username, password_hash=hashed_password)
             db.session.add(new_user)
             db.session.commit()
-
+            user = new_user #set user to the new user.
+    
     # Fix auto-increment sequence
         db.session.execute(text("SELECT setval('users_user_id_seq', (SELECT COALESCE(MAX(user_id), 1) FROM users), true);"))
         db.session.commit()
 
         # Store username in session instead of passing via URL
         session['username'] = username
-        session['password'] = password  # Not recommended for production!
+        session['password'] = password
+        session['user_id'] = user.user_id
+        session['is_moderator'] = bool(user.moderator)
 
+    session['username'] = username
     return redirect(url_for("handle_data"))
 
 @app.route('/handle_data', methods=['GET', 'POST'])
@@ -193,6 +231,6 @@ def handle_data():
 
     return render_template('index.html')
 
+
 if __name__ == '__main__':
     app.run()
-
