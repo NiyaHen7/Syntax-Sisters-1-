@@ -67,7 +67,7 @@
     width: 300px;
     text-align: center;
     transition: transform 0.3s ease-in-out;
-    border: 3px solid #002147; /* Aggie Blue Border */
+    border: 3px solid #002147; /* Border */
   }
   
   .professor-card:hover {
@@ -93,7 +93,7 @@
       {% if session.get('user_id') and session.get('is_moderator') %}
         <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
       {% endif %}
-      <li><a href="../student-profile.ejs">Student Profile </a></li>
+      <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
       <!-- Add more links here if needed -->
     </ul>
   </div>
