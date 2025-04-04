@@ -1,91 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professor List</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #1D3C73;
-        }
 
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-        }
-
-        .search-container {
-            background-color: #002147;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .search-container input[type="text"] {
-            padding: 10px;
-            width: 50%;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .search-container button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #004080;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .professors-list {
-            padding: 20px;
-        }
-
-        .professor-item {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s;
-            cursor: pointer;
-        }
-
-        .professor-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        .professor-item h2 {
-            margin-top: 0;
-            color: #002147;
-        }
-
-        .professor-item p {
-            margin: 8px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="search-container">
-        <form action="/professors" method="get">
-            <input type="text" name="search_term" placeholder="Search professor..." value="{{ search_term or '' }}">
-            <button type="submit">Search</button>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Professors</title>
+        <link rel="stylesheet" href="../static/styles.css"/>
+        <style>
+            /*
+            .professor-box {
+                border: 1px solid #ddd;
+                padding: 20px;
+                margin: 10px 0;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+    
+            .professor-box p {
+                margin: 5px 0;
+            }
+    
+            .professor-box .professor-id {
+                font-weight: bold;
+            }
+            a.fill-div {
+                display: block;
+                height: 100%;
+                width: 100%;
+                text-decoration: none;
+            }
+            */
+        </style>
+    </head>
+    <body>
+        <!-- Search Bar -->
+        <form method="POST" action="/search-professors">
+            <div class="input-box">
+            <i class="uil uil-search"></i>
+            <input type="text" name="user_search" id="user_search" placeholder="Enter Professor's Name Here">
+            <button type="submit" class="button">Search</button>
+            </div>
         </form>
-    </div>
-
-    <div class="container professors-list">
+        <h1>Professors List</h1>
+        
         {% for professor in professors %}
-            <div class="professor-item">
-                <h2>{{ professor.name }}</h2>
-                </div>
+            <div class="professor-box" onclick="window.location.href='/professor-profile/{{ professor.name }}';">
+                <p class="professor-id">Professor ID: {{ professor.professor_id }}</p>
+                <p>Name: {{ professor.name }}</p>
+                <p>Professor Type: {{ professor.professor_type }}</p>
+            </div>
         {% endfor %}
-    </div>
-</body>
-</html>
+    </body>
+    </html>

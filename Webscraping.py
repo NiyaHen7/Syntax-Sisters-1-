@@ -80,6 +80,9 @@ class Professors(db.Model):
     professor_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     professor_type = db.Column(db.String(255), nullable=False)
+
+                                
+# Create tables explicitly in app contex
     reviews = db.relationship('Reviews', back_populates='professor')
 
 class Reviews(db.Model):
@@ -99,6 +102,7 @@ class Reviews(db.Model):
     professor = db.relationship('Professors', back_populates='reviews')
 
 # Create tables explicitly in app context
+
 with app.app_context():
     db.create_all()
 
@@ -111,6 +115,7 @@ def index():
 # the filter will be based on the input from the search bar, 
 # submitted by the "search function"
 
+
 # use login as a reference
 
 from flask import request # Import request
@@ -122,9 +127,47 @@ def swap_name_order(name):
         return f"{last} {first}"
     return name
 
-@app.route('/professors')
+
+# use login as a reference
+
+@app.route('/professors', methods=['GET', 'POST'])
 def professors_page():
     try:
+
+        professors = db.session.execute(db.select(Professors)).scalars().all()
+        return render_template('professors.html', professors=professors)
+    except Exception as e:
+        return f"Something isn't working: {str(e)}"
+
+@app.route('/search-professors', methods=['GET', 'POST'])
+def search_professors():
+    try:
+        if request.method == 'POST':
+            user_search = request.form.get('user_search', '')
+            user_search = user_search.title() # by passes the case sensitivity 
+        # access the database and grab the professors
+        ##professors = db.session.execute(db.select(Professors)).scalars().all()
+        # then send these professors to the front end
+            professors = db.session.execute(
+                db.select(Professors).where(Professors.name.contains(user_search))
+            ).scalars().all()
+
+            filtered_professors = [
+                {
+                    "professor_id": prof.professor_id,
+                    "name": prof.name.title(),  # Optional: format nicely
+                    "professor_type": prof.professor_type
+                }
+                for prof in professors
+            ]
+    
+        return render_template('professors.html', professors=filtered_professors)
+    except Exception as e:
+        return f"Something isn't working: {str(e)}"
+    
+@app.route('/professor-profile/<name>')
+def professor_profile(name):
+    return render_template('professor_profile.html', name=name)
         search_term = request.args.get('search_term')
         professors = Professors.query.order_by(Professors.name)
 
@@ -146,6 +189,7 @@ def professors_page():
         return render_template('professors.html', professors=formatted_professors, search_term=search_term)
     except Exception as e:
         return f"Something isn't working: {str(e)}"
+
 
 
 @app.route('/student-profile')
