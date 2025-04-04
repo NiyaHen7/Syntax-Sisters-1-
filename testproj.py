@@ -90,7 +90,7 @@ class Reviews(db.Model):
 with app.app_context():
     db.create_all()
 
-# Swap Name Order Function (same as your provided code)
+# Swap Name Order Function 
 def swap_name_order(name):
     parts = name.strip().split()
     if len(parts) == 2:
@@ -98,7 +98,7 @@ def swap_name_order(name):
         return f"{last} {first}"
     return name
 
-# Enrollment Function (same as your provided code)
+# Enrollment Function 
 def enroll_professors(user_id):
     try:
         conn = psycopg2.connect(RAILWAY_DB_URL)
