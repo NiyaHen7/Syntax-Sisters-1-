@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rate My Aggie - Homepage</title>
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+  <link rel="stylesheet" href="../static/styles.css" />
 </head>
 <style>
   /* Full Page Layout */
@@ -84,6 +86,14 @@
   }
 </style>
 <body>
+  <!-- Search Bar -->
+  <form method="POST" action="/search-professors">
+    <div class="input-box">
+      <i class="uil uil-search"></i>
+      <input type="text" name="user_search" id="user_search" placeholder="Enter Professor's Name Here">
+      <button type="submit" class="button">Search</button>
+    </div>
+  </form>
   <!-- Sidebar -->
   <div class="sidebar">
     <h2>Rate My Aggie</h2>

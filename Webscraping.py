@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -106,6 +106,12 @@ with app.app_context():
 def index():
     return render_template('login.html')
 
+# for the search bar to be functional
+# it must render the professors page with a filter
+# the filter will be based on the input from the search bar, 
+# submitted by the "search function"
+
+# use login as a reference
 
 from flask import request # Import request
 
