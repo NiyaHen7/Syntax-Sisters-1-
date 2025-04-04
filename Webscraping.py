@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -73,7 +73,7 @@ class Professors(db.Model):
     name = db.Column(db.String(255), nullable=False)
     professor_type = db.Column(db.String(255), nullable=False)
                                 
-# Create tables explicitly in app context
+# Create tables explicitly in app contex
 with app.app_context():
     db.create_all()
 
@@ -81,16 +81,50 @@ with app.app_context():
 def index():
     return render_template('login.html')
 
+# for the search bar to be functional
+# it must render the professors page with a filter
+# the filter will be based on the input from the search bar, 
+# submitted by the "search function"
 
-@app.route('/professors')
+# use login as a reference
+
+@app.route('/professors', methods=['GET', 'POST'])
 def professors_page():
     try:
-        # access the database and grab the professors
         professors = db.session.execute(db.select(Professors)).scalars().all()
-        # then send these professors to the front end
         return render_template('professors.html', professors=professors)
     except Exception as e:
         return f"Something isn't working: {str(e)}"
+
+@app.route('/search-professors', methods=['GET', 'POST'])
+def search_professors():
+    try:
+        if request.method == 'POST':
+            user_search = request.form.get('user_search', '')
+            user_search = user_search.title() # by passes the case sensitivity 
+        # access the database and grab the professors
+        ##professors = db.session.execute(db.select(Professors)).scalars().all()
+        # then send these professors to the front end
+            professors = db.session.execute(
+                db.select(Professors).where(Professors.name.contains(user_search))
+            ).scalars().all()
+
+            filtered_professors = [
+                {
+                    "professor_id": prof.professor_id,
+                    "name": prof.name.title(),  # Optional: format nicely
+                    "professor_type": prof.professor_type
+                }
+                for prof in professors
+            ]
+    
+        return render_template('professors.html', professors=filtered_professors)
+    except Exception as e:
+        return f"Something isn't working: {str(e)}"
+    
+@app.route('/professor-profile/<name>')
+def professor_profile(name):
+    return render_template('professor_profile.html', name=name)
 
 @app.route('/student-profile')
 def student_profile():

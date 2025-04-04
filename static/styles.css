@@ -2,78 +2,169 @@
 .container {
     display: flex;
     min-height: 100vh;
+}
+a {
+  text-decoration: none !important;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: 250px; /* Sidebar width */
+  background-color: #002147; /* Aggie Blue */
+  padding: 20px;
+  color: white;
+  position: fixed;
+  height: 100%;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+}
+
+.sidebar h2 {
+  text-align: center;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 15px 0;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+/* Main Content Area */
+.main-content {
+  margin-left: 270px; /* Push content to the right to account for sidebar */
+  padding: 20px;
+  flex-grow: 1;
+}
+
+/* Search bar styling */
+.input-box {
+  position: relative;
+  height: 76px;
+  max-width: 900px;
+  width: 100%;
+  background: #fff;
+  margin: 0 40px;
+  border-radius: 8px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  margin-left: 270px; /* Ensure the search bar is aligned properly with the main content */
+}
+
+.input-box i,
+.input-box .button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.input-box i {
+  left: 20px;
+  font-size: 30px;
+  color: #707070;
+}
+
+.input-box input {
+  height: 100%;
+  width: 100%;
+  outline: none;
+  font-size: 18px;
+  font-weight: 400;
+  border: none;
+  padding: 0 155px 0 65px;
+  background-color: transparent;
+}
+
+.input-box .button {
+  right: 20px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  background-color: #4070f4;
+  cursor: pointer;
+}
+
+.input-box .button:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.professor-box {
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.professor-box p {
+  margin: 5px 0;
+  cursor: pointer;
+}
+
+.professor-box .professor-id {
+  font-weight: bold;
+}
+
+/* Professor Cards */
+.professors-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  justify-content: center;
+}
+
+.professor-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  width: 300px;
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+  border: 3px solid #002147; /* Aggie Blue Border */
+}
+
+.professor-card:hover {
+  transform: scale(1.05);
+}
+
+.professor-card h2 {
+  color: #002147; /* Dark Blue */
+}
+
+.professor-card p {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+/* Responsive for small screens */
+@media screen and (max-width: 500px) {
+  .input-box {
+    height: 66px;
+    margin: 0 8px;
   }
-  
-  /* Sidebar Styling */
-  .sidebar {
-    width: 250px; /* Sidebar width */
-    background-color: #002147; /* Aggie Blue */
-    padding: 20px;
-    color: white;
-    position: fixed;
-    height: 100%;
-    top: 0;
-    left: 0;
+  .input-box i {
+    left: 12px;
+    font-size: 25px;
   }
-  
-  .sidebar h2 {
-    text-align: center;
+  .input-box input {
+    padding: 0 112px 0 50px;
   }
-  
-  .sidebar ul {
-    list-style: none;
-    padding: 0;
+  .input-box .button {
+    right: 12px;
+    font-size: 14px;
+    padding: 8px 18px;
   }
-  
-  .sidebar ul li {
-    margin: 15px 0;
-  }
-  
-  .sidebar ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 18px;
-  }
-  
-  /* Main Content (Shifts Right) */
-  .main-content {
-    margin-left: 270px; /* Push content to the right */
-    padding: 20px;
-    flex-grow: 1;
-  }
-  
-  /* Professor Cards */
-  .professors-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 20px;
-    justify-content: center;
-  }
-  
-  .professor-card {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    padding: 15px;
-    width: 300px;
-    text-align: center;
-    transition: transform 0.3s ease-in-out;
-    border: 3px solid #002147; /* Aggie Blue Border */
-  }
-  
-  .professor-card:hover {
-    transform: scale(1.05);
-  }
-  
-  .professor-card h2 {
-    color: #002147; /* Dark Blue */
-  }
-  
-  .professor-card p {
-    margin: 8px 0;
-    font-size: 16px;
-  }
-  
-  
-  /* i moved this for demo sake but i'll put it back later - naomi */
+}

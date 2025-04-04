@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile</title>
+  <link rel="stylesheet" href="../static/styles.css">
+  <style>
+    /* Profile Content */
+    .main-content {
+      flex: 1;
+      padding: 30px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #004080;
+      text-align: center;
+    }
+
+    .highlight {
+      color: #ffd700;
+    }
+
+    /* Profile Card */
+    .profile-card {
+      background: linear-gradient(135deg, #eef4ff, #dce6ff);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin: 20px auto;
+      max-width: 500px;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .profile-card:hover {
+      transform: scale(1.03);
+    }
+
+    .profile-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #ccc;
+      display: inline-block;
+      margin-bottom: 10px;
+      border: 4px solid #004080;
+    }
+
+    .profile-card p {
+      font-size: 18px;
+      margin: 10px 0;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Profile Sections */
+    .profile-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #eef4ff;
+      border-left: 5px solid #ffd700;
+      border-radius: 10px;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      margin: 20px auto;
+    }
+
+    .profile-section h2 {
+      color: #004080;
+      border-bottom: 3px solid #ffd700;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      font-size: 22px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .profile-card, .profile-section {
+        max-width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Rate My Aggie</h2>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/professors">Professors</a></li>
+        <li><a href="/student_profile">Student Profile</a></li>
+      </ul>
+    </div>
+    <form method="POST" action="/search-professors">
+        <div class="input-box">
+          <i class="uil uil-search"></i>
+          <input type="text" name="user_search" id="user_search" placeholder="Enter Professor's Name Here">
+          <button type="submit" class="button">Search</button>
+        </div>
+      </form>
+    <!-- Profile Content -->
+    <div class="main-content">
+      <h1>Rate Your Professor,{{ name }}</h1>
+      <!-- Reviews go below this line-->
+    </div>
+  </div>
+</body>
+</html>

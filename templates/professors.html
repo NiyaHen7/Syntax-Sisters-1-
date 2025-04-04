@@ -1,16 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professors List</title>
-</head>
-<body>
-    <h1>Professors List</h1>
-    <ul>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Professors</title>
+        <link rel="stylesheet" href="../static/styles.css"/>
+        <style>
+            /*
+            .professor-box {
+                border: 1px solid #ddd;
+                padding: 20px;
+                margin: 10px 0;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+    
+            .professor-box p {
+                margin: 5px 0;
+            }
+    
+            .professor-box .professor-id {
+                font-weight: bold;
+            }
+            a.fill-div {
+                display: block;
+                height: 100%;
+                width: 100%;
+                text-decoration: none;
+            }
+            */
+        </style>
+    </head>
+    <body>
+        <!-- Search Bar -->
+        <form method="POST" action="/search-professors">
+            <div class="input-box">
+            <i class="uil uil-search"></i>
+            <input type="text" name="user_search" id="user_search" placeholder="Enter Professor's Name Here">
+            <button type="submit" class="button">Search</button>
+            </div>
+        </form>
+        <h1>Professors List</h1>
+        
         {% for professor in professors %}
-            <li>{{ professor.name }} - {{ professor.professor_type }}</li>
+            <div class="professor-box" onclick="window.location.href='/professor-profile/{{ professor.name }}';">
+                <p class="professor-id">Professor ID: {{ professor.professor_id }}</p>
+                <p>Name: {{ professor.name }}</p>
+                <p>Professor Type: {{ professor.professor_type }}</p>
+            </div>
         {% endfor %}
-    </ul>
-</body>
-</html>
+    </body>
+    </html>
