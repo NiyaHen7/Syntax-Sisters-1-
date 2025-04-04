@@ -6,7 +6,7 @@ Created on Thu Feb  6 16:30:54 2025
 @author: madisonskinner
 """
 
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
@@ -14,10 +14,7 @@ import os
 from sqlalchemy import create_engine
 import psycopg2
 from psycopg2.extras import execute_values
-from selenium import webdriver #add selenium
-from selenium.webdriver.common.by import By #add selenium
-from flask import jsonify
-
+from sqlalchemy import text
 
 # Load environment variables
 load_dotenv()
@@ -47,12 +44,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize the database
 db = SQLAlchemy(app)
 
+@app.route('/session_user')
+def get_session_user():
+    return f"Current session user: {session.get('user', 'No user logged in')}"
+
 # Define Database Models (same as your provided code)
 class Users(db.Model):
     __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    moderator = db.Column(db.Boolean, default=False)  # Ensure this line exists
     reviews = db.relationship('Reviews', back_populates='user')
 
     def set_password(self, password):
@@ -79,6 +81,7 @@ class Reviews(db.Model):
     sql_score = db.Column(db.Integer, nullable=True)
     status = db.Column(db.String(20), default='pending', nullable=False)
     auto_flagged = db.Column(db.Boolean, default=False, nullable=False)
+    reported = db.Column(db.Boolean, default=False)
 
     user = db.relationship('Users', back_populates='reviews')
     professor = db.relationship('Professors', back_populates='reviews')
@@ -87,7 +90,7 @@ class Reviews(db.Model):
 with app.app_context():
     db.create_all()
 
-# Swap Name Order Function (same as your provided code)
+# Swap Name Order Function 
 def swap_name_order(name):
     parts = name.strip().split()
     if len(parts) == 2:
@@ -95,7 +98,7 @@ def swap_name_order(name):
         return f"{last} {first}"
     return name
 
-# Enrollment Function (same as your provided code)
+# Enrollment Function 
 def enroll_professors(user_id):
     try:
         conn = psycopg2.connect(RAILWAY_DB_URL)
@@ -136,10 +139,9 @@ def enroll_professors(user_id):
         conn.close()
 
 # establish moderators
-MODERATOR_IDS = {19, 20, 21, 22, 23}
-
-def is_moderator(user_id):
-    return user_id in MODERATOR_IDS
+def moderator(user_id):
+    user = Users.query.get(user_id)
+    return user and user.moderator  # Checks if the user exists and is a moderator
 
 # auto moderation features
 flagged_words = {'fuck', 'fucking', 'bitch', 'shit', 'pussy', 'nigga', 'hell'}
@@ -153,12 +155,15 @@ def moderate_review_automatically(review_content):
     else:
         return {'status': 'approved', 'auto_flagged': False}
 
-
 # Routes
 @app.route('/')
 def index():
     professors = Professors.query.all()
-    return render_template('index.html', professors=professors)
+    user_id = session.get('user_id') 
+    is_moderator = session.get('is_moderator', False)  # Get moderator status from session
+    print("Session User ID:", user_id, "| Is Moderator:", is_moderator)  
+
+    return render_template('index.html', professors=professors, user_id=user_id, is_moderator=is_moderator)
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -177,15 +182,22 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form.get('username')
+    password = request.form.get('password')
 
-    user = Users.query.filter_by(username=username).first()
-    if user and user.check_password(password):
+    user = db.session.execute(text("SELECT * FROM users WHERE username = :u"), {'u': username}).fetchone()
+
+    if user and check_password_hash(user.password_hash, password):  # Ensure password check is correct
+        session.clear()
         session['user_id'] = user.user_id
+        session['username'] = user.username
+        session['is_moderator'] = bool(user.moderator)  # Ensure is_moderator is retrieved
+
+        print(f"Session after login: {session}")  # Debugging
+        session.permanent = True
         return redirect(url_for('index'))
     else:
-        return "Invalid credentials!", 403
+        return "Invalid credentials", 401
 
 @app.route('/logout')
 def logout():
@@ -214,20 +226,39 @@ def delete_review(review_id):
         return jsonify({'error': 'Review not found'}), 404
 
     # Check if user is a moderator or the review owner
-    if is_moderator(user_id) or review.user_id == user_id:
+    if moderator(user_id) or review.user_id == user_id:
         db.session.delete(review)
         db.session.commit()
         return jsonify({'message': 'Review deleted successfully'})
     else:
         return jsonify({'error': 'Permission denied'}), 403
 
+# getting user_id
+@app.route('/get_user_id')
+def get_user_id():
+    if 'username' in session:  # Ensure a user is logged in
+        username = session['username']
+
+        # Query database for the user's ID
+        cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+        user_id = cur.fetchone()
+
+        if user_id:
+            return f"User ID: {user_id[0]}"
+        else:
+            return "User not found", 404
+    else:
+        return "No user logged in", 403
+
 # Moderation Route
 @app.route('/submit_review', methods=['POST'])
 def submit_review():
     user_id = session.get('user_id')
+    print("Session User ID:", session.get('user_id'))
+
     if not user_id:
         return jsonify({'error': 'Unauthorized'}), 401
-
+    
     data = request.json
     review_content = data.get('content', '')
 
@@ -242,6 +273,30 @@ def submit_review():
     db.session.commit()
 
     return jsonify({'message': 'Review submitted', 'status': moderation_result['status']})
+
+# Report Review
+@app.route('/report/<int:review_id>', methods=['POST'])
+def report_review(review_id):
+    review = Reviews.query.get_or_404(review_id)
+    review.reported = True
+    db.session.commit()
+    return jsonify({'message': 'Review reported successfully'}), 200
+
+# check session 
+@app.route('/check_session')
+def check_session():
+    return f"Session: {session}"
+
+# to Mod Page
+@app.route('/moderation_page')
+def moderation_page():
+    print(f"Session at Moderation Page: {session}")  # Debugging
+    if not session.get('is_moderator'):
+        print("Moderator check failed!")  # Debugging
+        return "Access Denied", 403  
+
+    reported_reviews = db.session.execute(text("SELECT * FROM reviews WHERE reported = True")).fetchall()
+    return render_template('moderation.html', reported_reviews=reported_reviews)
 
 # Dashboard
 @app.route('/dashboard')
