@@ -22,6 +22,7 @@ import testproj
 from selenium.webdriver.chrome.options import Options
 import logging
 from flask import jsonify
+import time 
 
 
 logging.basicConfig(level=logging.INFO)
@@ -106,28 +107,59 @@ def index():
     return render_template('login.html')
 
 
+from flask import request # Import request
+
+def swap_name_order(name):
+    parts = name.strip().split()
+    if len(parts) == 2:
+        first, last = parts
+        return f"{last} {first}"
+    return name
+
 @app.route('/professors')
 def professors_page():
     try:
-        # access the database and grab the professors
-        professors = db.session.execute(db.select(Professors)).scalars().all()
-        # then send these professors to the front end
-        return render_template('professors.html', professors=professors)
+        search_term = request.args.get('search_term')
+        professors = Professors.query.order_by(Professors.name)
+
+        if search_term:
+            search_term_lower = search_term.lower()
+            professors = professors.filter(Professors.name.ilike(f"%{search_term_lower}%"))
+
+        professors_list = professors.all() # Fetch the results
+
+        # Swap names for display
+        formatted_professors = []
+        for professor in professors_list:
+            formatted_professor = {
+                'name': swap_name_order(professor.name),
+                'professor_type': professor.professor_type
+            }
+            formatted_professors.append(formatted_professor)
+
+        return render_template('professors.html', professors=formatted_professors, search_term=search_term)
     except Exception as e:
         return f"Something isn't working: {str(e)}"
+
 
 @app.route('/student-profile')
 def student_profile():
     try:
-        # we do a similar thing for student
-        # but we will have to filter by the user name 
-        # ( we can filter by the username we recieved from the webscraping)
-        student_profile = db.session.execute(db.select(Users)).scalars().all()
-        ### i will update this code in a bit
+        # Check if the user is logged in (username is in the session)
+        if 'username' in session:
+            username = session['username']
+            user_profile = Users.query.filter_by(username=username).first()
+
+            if user_profile:
+                # Render the student profile template with the user's data
+                return render_template('student_profile.html', user=user_profile)
+            else:
+                return "User profile not found.", 404
+        else:
+            # If the user is not logged in, redirect them to the login page or display an error
+            return "User not logged in.", 401
     except Exception as e:
-        # we will also need to update this error message
-        # to be more cohesive
-        return f"Something isn't working: {str(e)}"
+        return f"Error retrieving student profile: {str(e)}"
     
 @app.route('/moderation_page')
 def moderation_page():
@@ -189,9 +221,30 @@ def handle_data():
             EC.presence_of_element_located((By.CLASS_NAME, "instructors"))
         )
 
-        instructors = []
-        course_elements = driver.find_elements(By.CLASS_NAME, "instructors")
+        # Incremental Scroll Logic with WebDriverWait
+        scroll_pause_time = 2  # Adjust as needed
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        course_elements = driver.find_elements(By.CLASS_NAME, "instructors")  #Initial instructor list.
 
+        while True:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(scroll_pause_time)
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+
+            # Explicitly wait for more instructors to load
+            try:
+                WebDriverWait(driver, 10).until(
+                    lambda driver: len(driver.find_elements(By.CLASS_NAME, "instructors")) > len(course_elements)
+                )
+            except:
+                break #if nothing new is loaded, break.
+
+            course_elements = driver.find_elements(By.CLASS_NAME, "instructors") #update the instructor list.
+
+        instructors = []
         for course in course_elements:
             professor_name = course.text.strip()
             if professor_name and professor_name != 'Multiple Instructors':
@@ -201,9 +254,10 @@ def handle_data():
 
         with app.app_context():
             for instructor in instructors:
-                existing_professor = Professors.query.filter_by(name=instructor).first()
+                formatted_instructor = swap_name_order(instructor)
+                existing_professor = Professors.query.filter_by(name=formatted_instructor).first()
                 if not existing_professor:
-                    new_professor = Professors(name=instructor, professor_type="Unknown")
+                    new_professor = Professors(name=formatted_instructor, professor_type="Unknown")
                     db.session.add(new_professor)
             db.session.commit()
         print("Extracted Instructors:", instructors)
@@ -219,7 +273,7 @@ def handle_data():
         user = Users.query.filter_by(username=username).first()
         if user:
             user_id = user.user_id
-            testproj.enroll_professors(user_id) #call the function.
+            testproj.enroll_professors(user_id)
         else:
             print("User not found.")
 
@@ -231,6 +285,12 @@ def handle_data():
 
     return render_template('index.html')
 
+def swap_name_order(name):
+    parts = name.strip().split()
+    if len(parts) == 2:
+        first, last = parts
+        return f"{last} {first}"
+    return name
 
 if __name__ == '__main__':
     app.run()
