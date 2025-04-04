@@ -89,23 +89,26 @@
     <div class="sidebar">
       <h2>Rate My Aggie</h2>
       <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/professors">Professors</a></li>
-        <li><a href="/student_profile">Student Profile</a></li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/professors">Professors</a></li>
+          {% if session.get('user_id') and session.get('is_moderator') %}
+              <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+          {% endif %}
+          <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
       </ul>
-    </div>
-    <form method="POST" action="/search-professors">
-        <div class="input-box">
-          <i class="uil uil-search"></i>
-          <input type="text" name="user_search" id="user_search" placeholder="Enter Professor's Name Here">
-          <button type="submit" class="button">Search</button>
-        </div>
-      </form>
+  </div>
+  <div class="main-content">
+    <!-- Search Bar -->
+    <form method="GET" action="/professors">
+      <div class="search-container">
+        <input type="text" name="search_term" id="search_term" value="{{ search_term or '' }}" placeholder="Enter Professor's Name Here">
+        <button type="submit" class="button">Search</button>
+      </div>
+    </form>
     <!-- Profile Content -->
-    <div class="main-content">
-      <h1>Rate Your Professor,{{ name }}</h1>
-      <!-- Reviews go below this line-->
-    </div>
+    <h1>Rate Your Professor,{{ name }}</h1>
+    <!-- Reviews go below this line-->
+  </div>
   </div>
 </body>
 </html>

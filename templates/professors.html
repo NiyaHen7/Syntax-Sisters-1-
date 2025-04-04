@@ -33,16 +33,27 @@
         </style>
     </head>
     <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Rate My Aggie</h2>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/professors">Professors</a></li>
+            {% if session.get('user_id') and session.get('is_moderator') %}
+                <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
         <!-- Search Bar -->
-        <form method="POST" action="/search-professors">
-            <div class="input-box">
-            <i class="uil uil-search"></i>
-            <input type="text" name="user_search" id="user_search" placeholder="Enter Professor's Name Here">
-            <button type="submit" class="button">Search</button>
+        <form method="GET" action="/professors">
+            <div class="search-container">
+              <input type="text" name="search_term" id="search_term" value="{{ search_term or '' }}" placeholder="Enter Professor's Name Here">
+              <button type="submit" class="button">Search</button>
             </div>
-        </form>
+          </form>
         <h1>Professors List</h1>
-        
         {% for professor in professors %}
             <div class="professor-box" onclick="window.location.href='/professor-profile/{{ professor.name }}';">
                 <p class="professor-id">Professor ID: {{ professor.professor_id }}</p>
@@ -50,5 +61,6 @@
                 <p>Professor Type: {{ professor.professor_type }}</p>
             </div>
         {% endfor %}
+    </div>
     </body>
     </html>
