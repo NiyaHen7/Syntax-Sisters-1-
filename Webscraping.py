@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -21,8 +21,7 @@ from sqlalchemy.sql import text
 import testproj
 from selenium.webdriver.chrome.options import Options
 import logging
-from flask import jsonify
-import time 
+import time
 
 
 logging.basicConfig(level=logging.INFO)
@@ -82,7 +81,7 @@ class Professors(db.Model):
     professor_type = db.Column(db.String(255), nullable=False)
 
                                 
-# Create tables explicitly in app contex
+# Create tables explicitly in app context
     reviews = db.relationship('Reviews', back_populates='professor')
 
 class Reviews(db.Model):
@@ -110,86 +109,33 @@ with app.app_context():
 def index():
     return render_template('login.html')
 
-# for the search bar to be functional
-# it must render the professors page with a filter
-# the filter will be based on the input from the search bar, 
-# submitted by the "search function"
-
-
-# use login as a reference
-
-from flask import request # Import request
-
-def swap_name_order(name):
-    parts = name.strip().split()
-    if len(parts) == 2:
-        first, last = parts
-        return f"{last} {first}"
-    return name
-
-
-# use login as a reference
-
 @app.route('/professors', methods=['GET', 'POST'])
 def professors_page():
     try:
-
-        professors = db.session.execute(db.select(Professors)).scalars().all()
-        return render_template('professors.html', professors=professors)
-    except Exception as e:
-        return f"Something isn't working: {str(e)}"
-
-@app.route('/search-professors', methods=['GET', 'POST'])
-def search_professors():
-    try:
-        if request.method == 'POST':
-            user_search = request.form.get('user_search', '')
-            user_search = user_search.title() # by passes the case sensitivity 
-        # access the database and grab the professors
-        ##professors = db.session.execute(db.select(Professors)).scalars().all()
-        # then send these professors to the front end
-            professors = db.session.execute(
-                db.select(Professors).where(Professors.name.contains(user_search))
-            ).scalars().all()
-
-            filtered_professors = [
-                {
-                    "professor_id": prof.professor_id,
-                    "name": prof.name.title(),  # Optional: format nicely
-                    "professor_type": prof.professor_type
-                }
-                for prof in professors
-            ]
-    
-        return render_template('professors.html', professors=filtered_professors)
-    except Exception as e:
-        return f"Something isn't working: {str(e)}"
-    
-@app.route('/professor-profile/<name>')
-def professor_profile(name):
-    return render_template('professor_profile.html', name=name)
         search_term = request.args.get('search_term')
         professors = Professors.query.order_by(Professors.name)
 
         if search_term:
-            search_term_lower = search_term.lower()
-            professors = professors.filter(Professors.name.ilike(f"%{search_term_lower}%"))
+            search_term = search_term.lower()
+            professors = professors.filter(Professors.name.ilike(f"%{search_term}%"))
+        
+        professors_list = professors.all()
 
-        professors_list = professors.all() # Fetch the results
-
-        # Swap names for display
         formatted_professors = []
         for professor in professors_list:
             formatted_professor = {
-                'name': swap_name_order(professor.name),
-                'professor_type': professor.professor_type
+            'name': swap_name_order(professor.name),
+            'professor_type': professor.professor_type
             }
             formatted_professors.append(formatted_professor)
 
         return render_template('professors.html', professors=formatted_professors, search_term=search_term)
     except Exception as e:
         return f"Something isn't working: {str(e)}"
-
+    
+@app.route('/professor-profile/<name>')
+def professor_profile(name):
+    return render_template('professor_profile.html', name=name)
 
 
 @app.route('/student-profile')
