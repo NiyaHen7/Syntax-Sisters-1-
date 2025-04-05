@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Page</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <h1>Reviews Page</h1>
+    <h2><strong>{{professors.name}}</strong></h2>
+    <!-- Review Submission Form -->
+    <div class="content">
+        <form action="/review" id="review-form">
+            <label>Select Rating:</label><br>
+            <input type="radio" name="stars" value="1"> 1 star
+            <input type="radio" name="stars" value="2"> 2 stars
+            <input type="radio" name="stars" value="3"> 3 stars
+            <input type="radio" name="stars" value="4"> 4 stars
+            <input type="radio" name="stars" value="5"> 5 stars
+            <br>
+
+            <input type="text" id="comment" name="comment" class="comment-box" placeholder="Enter your review here">
+            <br/>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    {% if reviews|length < 1 %}
+        <h3>There are no reviews</h3>
+    {% else %}
+        <h3>Submitted Reviews</h3>
+        <div id="reviews-list">
+            {% for review in reviews %}
+                <div id="review-{{ review.review_id }}">
+                    <p><strong>Rating:</strong> {{ review.sql_score }} stars</p>
+                    <p><strong>Comment:</strong> {{ review.review }}</p>
+                    <a href="/delete/{{review_id}}">Delete</a>
+                </div>
+                <br/>
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>
+
