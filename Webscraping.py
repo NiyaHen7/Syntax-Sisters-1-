@@ -125,7 +125,8 @@ def professors_page():
         for professor in professors_list:
             formatted_professor = {
             'name': swap_name_order(professor.name),
-            'professor_type': professor.professor_type
+            'professor_type': professor.professor_type,
+            'professor_id': professor.professor_id
             }
             formatted_professors.append(formatted_professor)
 
@@ -133,9 +134,9 @@ def professors_page():
     except Exception as e:
         return f"Something isn't working: {str(e)}"
     
-@app.route('/professor-profile/<name>')
-def professor_profile(name):
-    return render_template('professor_profile.html', name=name)
+# @app.route('/professor-profile/<professor_id>/<name>')
+# def professor_profile(professor_id,name):
+#     return render_template('professor_profile.html', professor_id=professor_id, name=name)
 
 
 @app.route('/student-profile')
@@ -280,6 +281,35 @@ def handle_data():
         driver.quit()
 
     return render_template('index.html')
+# when on the student profile page
+# filter the reviews 
+@app.route('/review', methods=["POST"])
+def review():
+    # these are all the non nullable variables, can be adjusted
+    stars = request.form.get('stars')
+    comment = request.form.get('comment')
+    user_id = session['user_id']
+    professor_name = request.form.get('prof_name')
+    professor_id = request.form.get('prof_id')
+    created_at = db.func.now()
+    status = 'pending'
+    auto_flagged = False
+
+    if not stars or not comment:
+        return "Missing rating or comment", 400
+    new_review = Reviews(sql_score=int(stars), review=comment, user_id=user_id, professor_id=professor_id, created_at=created_at, status=status, auto_flagged=auto_flagged)
+    try:
+        db.session.add(new_review)
+        db.session.commit()
+        return redirect(url_for("professor_profile",name=professor_name, professor_id=professor_id))
+    except Exception as e:
+        print(f"Error: {e}")
+        return f"Error: {e}"
+
+@app.route('/professor-profile/<professor_id>/<name>', methods=["GET"])
+def professor_profile(professor_id, name):
+    reviews = Reviews.query.filter_by(professor_id=professor_id).order_by(Reviews.created_at.desc()).all()
+    return render_template("professor_profile.html", professor_id=professor_id, name=name, reviews=reviews)
 
 def swap_name_order(name):
     parts = name.strip().split()
