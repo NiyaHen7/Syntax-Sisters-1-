@@ -106,9 +106,35 @@
       </div>
     </form>
     <!-- Profile Content -->
-    <h1>Rate Your Professor,{{ name }}</h1>
+    <h1>Rate Your Professor, {{ name }}</h1>
     <!-- Reviews go below this line-->
-  </div>
+
+     <!-- Display active reviews-->
+      <!-- Prompt Reviews-->
+    <div class="content">
+      <form action="/review" id="review-form" method="post">
+          <label>Select Rating:</label><br>
+          <input type="radio" name="stars" value="1"> 1 star
+          <input type="radio" name="stars" value="2"> 2 stars
+          <input type="radio" name="stars" value="3"> 3 stars
+          <input type="radio" name="stars" value="4"> 4 stars
+          <input type="radio" name="stars" value="5"> 5 stars
+          <input type="hidden" name="prof_id" value="{{ professor_id }}"/>
+          <input type="hidden" name="prof_name" value="{{ name }}"/>
+          <br>
+
+          <input type="text" id="comment" name="comment" class="comment-box" placeholder="Enter your review here">
+          <br/>
+          <button type="submit">Submit</button>
+      </form>
+      <!-- For Every Review, Display it-->
+      {% for review in reviews %}
+        <div class="professor-box">
+            <p class="professor-id">Professor ID: {{ review.professor_id }}</p>
+            <p>{{ review.review}}</p>
+        </div>
+      {% endfor %}
+    </div>
   </div>
 </body>
 </html>

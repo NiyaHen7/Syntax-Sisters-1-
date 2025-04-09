@@ -55,7 +55,7 @@
           </form>
         <h1>Professors List</h1>
         {% for professor in professors %}
-            <div class="professor-box" onclick="window.location.href='/professor-profile/{{ professor.name }}';">
+            <div class="professor-box" onclick="window.location.href='/professor-profile/{{ professor.professor_id }}/{{ professor.name}}';">
                 <p class="professor-id">Professor ID: {{ professor.professor_id }}</p>
                 <p>Name: {{ professor.name }}</p>
                 <p>Professor Type: {{ professor.professor_type }}</p>
