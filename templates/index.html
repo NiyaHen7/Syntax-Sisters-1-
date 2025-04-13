@@ -6,42 +6,154 @@
   <title>Rate My Aggie - Homepage</title>
   <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
   <link rel="stylesheet" href="../static/styles.css" />
+  <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex; /* Use flexbox for the main layout (sidebar and content) */
+            min-height: 100vh;
+        }
+        header {
+            background-color: #0A2240;
+            padding: 1rem;
+            color: white;
+            text-align: left;
+            width: 100%;
+            flex-shrink: 0;
+            /* Position it at the top */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10; /* Ensure header is above sidebar */
+        }
+        header h1 {
+            margin: 0;
+            font-weight: bold;
+            padding-left: 1rem;
+        }
+        .sidebar {
+            background-color: #0A2240;
+            color: white;
+            width: 200px;
+            padding-top: 1rem;
+            height: 100vh;
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            /* Add padding-top to avoid overlap with the fixed header */
+            padding-top: 4rem; /* Adjust this value based on your header's height + padding */
+        }
+        .sidebar > div { /* Style the logo container */
+            padding: 1rem;
+            text-align: center;
+        }
+        .sidebar img {
+            width: 80%;
+            max-width: 150px;
+            height: auto;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            margin-top: 1rem;
+        }
+        .sidebar li a {
+            display: block;
+            color: white;
+            padding: 1rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sidebar li a:hover {
+            background-color: #133B67;
+        }
+        main {
+            background-color: #4066B0;
+            padding: 2rem;
+            flex-grow: 1;
+            min-height: calc(100vh - 3rem);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Add margin-left to push main content to the right of the fixed sidebar */
+            margin-left: 200px;
+            /* Add padding-top to avoid overlap with the fixed header */
+            padding-top: 4rem; /* Adjust this value to match sidebar's padding-top */
+        }
+        main .content-wrapper {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 960px;
+        }
+    main .content-wrapper h1 {
+      margin-bottom: 1rem;
+    }
+    main .content-wrapper p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    .button {
+      background-color: black;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #222;
+    }
+    input, textarea, select {
+      width: calc(100% - 1.5rem); /* Adjust for padding */
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .search-container {
+      margin-bottom: 2rem; /* Add some space below the search bar */
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: center; /* Center the search bar */
+    }
+    .search-container input[type="text"] {
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
-  <!-- Search Bar -->
-  <form method="GET" action="/professors">
-    <div class="search-container">
-      <input type="text" name="search_term" id="search_term" value="{{ search_term or '' }}" placeholder="Enter Professor's Name Here">
-      <button type="submit" class="button">Search</button>
-    </div>
-  </form>
-  <!-- Sidebar -->
+  <header>
+    <h1>RATE MY AGGIE</h1>
+  </header>
   <div class="sidebar">
-    <h2>Rate My Aggie</h2>
+    <div style="padding: 1rem; text-align: center;">
+        <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
+    </div>
     <ul>
-      <li><a href="/">Home</a></li>
-      <li><a href="/professors">Professors</a></li>
-      {% if session.get('user_id') and session.get('is_moderator') %}
-        <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
-      {% endif %}
-      <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
-      <!-- Add more links here if needed -->
+        <li><a href="/">Home</a></li>
+        <li><a href="/professors">Professors</a></li>
+        {% if session.get('user_id') and session.get('is_moderator') %}
+            <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
     </ul>
-  </div>
-
-  
-  
-  <!-- Main Content -->
-  <div class="main-content">
-    <h1>Welcome to Rate My Aggie!</h1>
-    <p>Rate your professors and help others!</p>
-    <a href="/professors">Go to Professors page</a>
-  </div>
+</div>
+  <main>
+    <div class="content-wrapper">
+      <h1>Welcome to Rate My Aggie!</h1>
+      <p>Rate your professors and help others make informed decisions about their courses.</p>
+      <a href="/professors" class="button">Browse Professors</a>
+    </div>
+  </main>
 </body>
 </html>
-
-<!--
-{% if session.get('user_id') and session.get('is_moderator') %}
-        <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
-      {% endif %}
-      -->
