@@ -136,7 +136,7 @@
           <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
       </div>
       <ul>
-          <li><a href="/">Home</a></li>
+          <li><a href="/home">Home</a></li>
           <li><a href="/professors">Professors</a></li>
           {% if session.get('user_id') and session.get('is_moderator') %}
               <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
