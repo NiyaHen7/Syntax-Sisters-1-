@@ -258,6 +258,21 @@
         .report-button {
             color: #333;
         }
+
+        .average-rating {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .rating-green {
+            color: green;
+        }
+        .rating-yellow {
+            color: gold; 
+        }
+        .rating-red {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -290,6 +305,23 @@
             {% endwith %}
             <h1>Professor: {{ name }}</h1>
 
+            {% if average_score is not none %}
+                {% set rating_class = '' %}
+                {% if average_score >= 4 %}
+                    {% set rating_class = 'rating-green' %}
+                {% elif average_score >= 3 %}
+                    {% set rating_class = 'rating-yellow' %}
+                {% else %}
+                    {% set rating_class = 'rating-red' %}
+                {% endif %}
+                <p class="average-rating {{ rating_class }}">Rating:
+                    {% for _ in range(average_score_int) %}★{% endfor %}
+                    ({{ "{:.2f}".format(average_score) }})
+                </p>
+            {% else %}
+                <p>No ratings yet for {{ name }}.</p>
+            {% endif %}
+
             <h2>Reviews</h2>
             {% if reviews %}
                 {% for review in reviews %}
@@ -300,9 +332,9 @@
                             </span> -
                             Class Format: {{ review.class_format }} -
                             Posted on: {{ review.created_at }}
-                             <div class="review-actions">  {# New div for the dropdown #}
+                            <div class="review-actions">
                                 <div class="dropdown">
-                                    <button class="dropbtn">...</button>  {# Three-dot button #}
+                                    <button class="dropbtn">...</button>
                                     <div class="dropdown-content">
                                         {% if session['user_id'] == review.user_id or session.get('is_moderator') %}
                                             <form method="POST" action="{{ url_for('delete_review', review_id=review.review_id) }}"
