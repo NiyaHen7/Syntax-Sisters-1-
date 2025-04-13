@@ -394,7 +394,16 @@ def professor_profile(professor_id, name):
     logging.info(f"/professor-profile - User ID: {user_id}, Professor ID: {professor_id}, Review Allowed: {is_review_allowed}")
     reviews = Reviews.query.filter_by(professor_id=professor_id).order_by(
         Reviews.created_at.desc()).all()
-    return render_template("professor_profile.html", professor_id=professor_id, name=name, reviews=reviews, is_review_allowed=is_review_allowed)
+
+    average_score = None
+    average_score_int = 0  # Initialize
+
+    if reviews:
+        total_score = sum(review.sql_score for review in reviews)
+        average_score = total_score / len(reviews)
+        average_score_int = int(average_score + 0.5) # Convert to integer here
+
+    return render_template("professor_profile.html", professor_id=professor_id, name=name, reviews=reviews, is_review_allowed=is_review_allowed, average_score=average_score, average_score_int=average_score_int)
 
 def swap_name_order(name):
     parts = name.strip().split()
@@ -402,6 +411,7 @@ def swap_name_order(name):
         first, last = parts
         return f"{last} {first}"
     return name
+
 
 @app.route('/delete_review/<int:review_id>', methods=['POST'])
 def delete_review(review_id):
