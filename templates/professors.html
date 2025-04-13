@@ -42,7 +42,7 @@
             left: 0;
             overflow-y: auto;
             /* Add padding-top to avoid overlap with the fixed header */
-            padding-top: 4rem; /* Adjust this value based on your header's height + padding */
+            padding-top: 4rem; 
         }
         .sidebar > div { /* Style the logo container */
             padding: 1rem;
@@ -80,7 +80,7 @@
             /* Add margin-left to push main content to the right of the fixed sidebar */
             margin-left: 200px;
             /* Add padding-top to avoid overlap with the fixed header */
-            padding-top: 4rem; /* Adjust this value to match sidebar's padding-top */
+            padding-top: 4rem; 
         }
         main .content-wrapper {
             background-color: white;
@@ -150,7 +150,7 @@
             <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
         </div>
         <ul>
-            <li><a href="/">Home</a></li>
+            <li><a href="/home">Home</a></li>
             <li><a href="/professors">Professors</a></li>
             {% if session.get('user_id') and session.get('is_moderator') %}
                 <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
