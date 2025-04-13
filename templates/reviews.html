@@ -3,44 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reviews Page</title>
+    <title>Reviews for {{ professors.name }} - RATE MY AGGIE</title>
     <link rel="stylesheet" href="../static/styles.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex; /* Use flexbox for the main layout (sidebar and content) */
+            min-height: 100vh;
+        }
+        header {
+            background-color: #0A2240;
+            padding: 1rem;
+            color: white;
+            text-align: left;
+            width: 100%;
+            flex-shrink: 0;
+            /* Position it at the top */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10; /* Ensure header is above sidebar */
+        }
+        header h1 {
+            margin: 0;
+            font-weight: bold;
+            padding-left: 1rem;
+        }
+        .sidebar {
+            background-color: #0A2240;
+            color: white;
+            width: 200px;
+            padding-top: 1rem;
+            height: 100vh;
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            /* Add padding-top to avoid overlap with the fixed header */
+            padding-top: 4rem; /* Adjust this value based on your header's height + padding */
+        }
+        .sidebar > div { /* Style the logo container */
+            padding: 1rem;
+            text-align: center;
+        }
+        .sidebar img {
+            width: 80%;
+            max-width: 150px;
+            height: auto;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            margin-top: 1rem;
+        }
+        .sidebar li a {
+            display: block;
+            color: white;
+            padding: 1rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sidebar li a:hover {
+            background-color: #133B67;
+        }
+        main {
+            background-color: #4066B0;
+            padding: 2rem;
+            flex-grow: 1;
+            min-height: calc(100vh - 3rem);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Add margin-left to push main content to the right of the fixed sidebar */
+            margin-left: 200px;
+            /* Add padding-top to avoid overlap with the fixed header */
+            padding-top: 4rem; /* Adjust this value to match sidebar's padding-top */
+        }
+        main .content-wrapper {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 960px;
+        }
+        .button {
+            background-color: black;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #222;
+        }
+        input[type="text"].comment-box {
+            width: calc(100% - 1.5rem); /* Adjust for padding */
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input[type="radio"] {
+            margin-right: 0.5rem;
+        }
+        #reviews-list {
+            margin-top: 1rem;
+        }
+        #reviews-list div[id^="review-"] {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        #reviews-list div[id^="review-"] p {
+            margin: 0.5rem 0;
+        }
+        #reviews-list div[id^="review-"] a {
+            color: red;
+            text-decoration: none;
+        }
+        #reviews-list div[id^="review-"] a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Reviews Page</h1>
-    <h2><strong>{{professors.name}}</strong></h2>
-    <!-- Review Submission Form -->
-    <div class="content">
-        <form action="/review" id="review-form">
-            <label>Select Rating:</label><br>
-            <input type="radio" name="stars" value="1"> 1 star
-            <input type="radio" name="stars" value="2"> 2 stars
-            <input type="radio" name="stars" value="3"> 3 stars
-            <input type="radio" name="stars" value="4"> 4 stars
-            <input type="radio" name="stars" value="5"> 5 stars
-            <br>
-
-            <input type="text" id="comment" name="comment" class="comment-box" placeholder="Enter your review here">
-            <br/>
-            <button type="submit">Submit</button>
-        </form>
-    </div>
-
-    {% if reviews|length < 1 %}
-        <h3>There are no reviews</h3>
-    {% else %}
-        <h3>Submitted Reviews</h3>
-        <div id="reviews-list">
-            {% for review in reviews %}
-                <div id="review-{{ review.review_id }}">
-                    <p><strong>Rating:</strong> {{ review.sql_score }} stars</p>
-                    <p><strong>Comment:</strong> {{ review.review }}</p>
-                    <a href="/delete/{{review_id}}">Delete</a>
-                </div>
-                <br/>
-            {% endfor %}
+    <header>
+        <h1>RATE MY AGGIE</h1>
+    </header>
+    <div class="sidebar">
+        <div style="padding: 1rem; text-align: center;">
+            <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
         </div>
-    {% endif %}
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/professors">Professors</a></li>
+            {% if session.get('user_id') and session.get('is_moderator') %}
+                <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
+        </ul>
+    </div>
+    <main>
+        <div class="content-wrapper">
+            <h2>Reviews for <strong>{{ professors.name }}</strong></h2>
+            <div class="content">
+                <form action="/review" id="review-form">
+                    <label>Select Rating:</label><br>
+                    <input type="radio" name="stars" value="1"> 1 star
+                    <input type="radio" name="stars" value="2"> 2 stars
+                    <input type="radio" name="stars" value="3"> 3 stars
+                    <input type="radio" name="stars" value="4"> 4 stars
+                    <input type="radio" name="stars" value="5"> 5 stars
+                    <br>
+
+                    <input type="text" id="comment" name="comment" class="comment-box" placeholder="Enter your review here">
+                    <br/>
+                    <button type="submit" class="button">Submit</button>
+                </form>
+            </div>
+
+            {% if reviews|length < 1 %}
+                <h3>There are no reviews yet.</h3>
+            {% else %}
+                <h3>Submitted Reviews</h3>
+                <div id="reviews-list">
+                    {% for review in reviews %}
+                        <div id="review-{{ review.review_id }}">
+                            <p><strong>Rating:</strong> {{ review.sql_score }} stars</p>
+                            <p><strong>Comment:</strong> {{ review.review }}</p>
+                            <a href="/delete/{{review_id}}">Delete</a>
+                        </div>
+                        <br/>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </main>
 </body>
 </html>
-
