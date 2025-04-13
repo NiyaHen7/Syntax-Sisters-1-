@@ -1,55 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moderation Panel</title>
-  <link rel="stylesheet" href="/static/style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moderation Panel - RATE MY AGGIE</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column; /* Stack header and the rest vertically */
+            min-height: 100vh;
+        }
+        header {
+            background-color: #0A2240;
+            padding: 1rem;
+            color: white;
+            text-align: left;
+            width: 100%;
+            flex-shrink: 0;
+            z-index: 10; /* Ensure header is above sidebar if overlap occurs */
+        }
+        header h1 {
+            margin: 0;
+            font-weight: bold;
+            padding-left: 1rem;
+        }
+        .sidebar {
+            background-color: #0A2240;
+            color: white;
+            width: 200px;
+            padding-top: 1rem;
+            height: 100vh;
+            flex-shrink: 0;
+            position: fixed; /* Keep sidebar fixed on the left */
+            top: 0;
+            left: 0;
+            overflow-y: auto; /* Allow scrolling if sidebar content overflows */
+        }
+        .sidebar > div { /* Style the logo container */
+            padding: 1rem;
+            text-align: center;
+        }
+        .sidebar img {
+            width: 80%;
+            max-width: 150px;
+            height: auto;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            margin-top: 1rem; /* Add some space between logo and links */
+        }
+        .sidebar li a {
+            display: block;
+            color: white;
+            padding: 1rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sidebar li a:hover {
+            background-color: #133B67;
+        }
+        main {
+            background-color: #4066B0;
+            padding: 2rem;
+            flex-grow: 1;
+            min-height: calc(100vh - 3rem);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Add margin-left to push main content to the right of the fixed sidebar */
+            margin-left: 200px;
+        }
+        main .content-wrapper {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 960px;
+        }
+        .review-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .review-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .dismiss-button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .dismiss-button:hover {
+            background-color: #367c39;
+        }
+        .delete-button {
+            background-color: #f44336; /* Red */
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
 </head>
 <body>
-  <h1>Moderation Panel</h1>
-  
-  {% if reviews %}
-    <table>
-      <thead>
-        <tr>
-          <th>Review ID</th>
-          <th>User ID</th>
-          <th>Content</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for review in reviews %}
-        <tr>
-          <td>{{ review.review_id }}</td>
-          <td>{{ review.user_id }}</td>
-          <td>{{ review.content }}</td>
-          <td>
-            
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No reported reviews at the moment.</p>
-  {% endif %}
-
-  <script>
-    function moderateReview(reviewId, action) {
-      fetch(`/moderate/${reviewId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: action })
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert(data.message);
-        location.reload(); // Refresh to reflect changes
-      })
-      .catch(error => console.error('Error:', error));
-    }
-  </script>
+    <header>
+        <h1>RATE MY AGGIE</h1>
+    </header>
+    <div class="sidebar">
+      <div style="padding: 1rem; text-align: center;">
+          <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
+      </div>
+      <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/professors">Professors</a></li>
+          {% if session.get('user_id') and session.get('is_moderator') %}
+              <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+          {% endif %}
+          <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
+      </ul>
+  </div>
+    <main>
+        <div class="content-wrapper">
+            <h2>Moderation Panel</h2>
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <p><strong>Review ID:</strong> {{ review.review_id }}</p>
+                            <p><strong>User ID:</strong> {{ review.user_id }}</p>
+                        </div>
+                        <p><strong>Content:</strong> {{ review.review }}</p>
+                        <p><strong>Date:</strong> {{ review.created_at }}</p>
+                        <div class="review-actions">
+                            <form method="POST" action="{{ url_for('dismiss_review', review_id=review.review_id) }}">
+                                <button type="submit" class="dismiss-button">Dismiss</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_review', review_id=review.review_id) }}">
+                                <button type="submit" class="delete-button">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No reported reviews at the moment.</p>
+            {% endif %}
+        </div>
+    </main>
 </body>
 </html>
