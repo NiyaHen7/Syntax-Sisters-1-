@@ -1,140 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Profile</title>
-  <link rel="stylesheet" href="../static/styles.css">
-  <style>
-    /* Profile Content */
-    .main-content {
-      flex: 1;
-      padding: 30px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professor Profile - {{ name }} - RATE MY AGGIE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex; /* Use flexbox for the main layout (sidebar and content) */
+            min-height: 100vh;
+        }
+        header {
+            background-color: #0A2240;
+            padding: 1rem;
+            color: white;
+            text-align: left;
+            width: 100%;
+            flex-shrink: 0;
+            /* Position it at the top */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10; /* Ensure header is above sidebar */
+        }
+        header h1 {
+            margin: 0;
+            font-weight: bold;
+            padding-left: 1rem;
+        }
+        .sidebar {
+            background-color: #0A2240;
+            color: white;
+            width: 200px;
+            padding-top: 1rem;
+            height: 100vh;
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            /* Add padding-top to avoid overlap with the fixed header */
+            padding-top: 4rem; /* Adjust this value based on your header's height + padding */
+        }
+        .sidebar > div { /* Style the logo container */
+            padding: 1rem;
+            text-align: center;
+        }
+        .sidebar img {
+            width: 80%;
+            max-width: 150px;
+            height: auto;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            margin-top: 1rem;
+        }
+        .sidebar li a {
+            display: block;
+            color: white;
+            padding: 1rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sidebar li a:hover {
+            background-color: #133B67;
+        }
+        main {
+            background-color: #4066B0;
+            padding: 2rem;
+            flex-grow: 1;
+            min-height: calc(100vh - 3rem);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Add margin-left to push main content to the right of the fixed sidebar */
+            margin-left: 200px;
+            /* Add padding-top to avoid overlap with the fixed header */
+            padding-top: 4rem; /* Adjust this value to match sidebar's padding-top */
+        }
+        main .content-wrapper {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 960px;
+        }
+        .button {
+            background-color: black;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #222;
+        }
+        input, textarea, select {
+            width: calc(100% - 1.5rem); /* Adjust for padding */
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .review-container {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
 
-    h1 {
-      font-size: 28px;
-      color: #004080;
-      text-align: center;
-    }
+        .review-info {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #777;
+            display: flex; /* Use flexbox for layout */
+            justify-content: space-between; /* Space between info and actions */
+            align-items: center; /* Vertically center items */
+        }
 
-    .highlight {
-      color: #ffd700;
-    }
+        .review-text {
+            margin-bottom: 10px;
+        }
 
-    /* Profile Card */
-    .profile-card {
-      background: linear-gradient(135deg, #eef4ff, #dce6ff);
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      margin: 20px auto;
-      max-width: 500px;
-      transition: transform 0.3s ease-in-out;
-    }
+        .star-rating {
+            color: gold;
+            font-size: 1.2em;
+        }
 
-    .profile-card:hover {
-      transform: scale(1.03);
-    }
+        .review-form {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
 
-    .profile-img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #ccc;
-      display: inline-block;
-      margin-bottom: 10px;
-      border: 4px solid #004080;
-    }
+        .review-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
 
-    .profile-card p {
-      font-size: 18px;
-      margin: 10px 0;
-      font-weight: bold;
-      color: #333;
-    }
+        .review-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
 
-    /* Profile Sections */
-    .profile-section {
-      margin-top: 20px;
-      padding: 20px;
-      background: #eef4ff;
-      border-left: 5px solid #ffd700;
-      border-radius: 10px;
-      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      margin: 20px auto;
-    }
+        .review-form .radio-group label {
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: normal;
+        }
 
-    .profile-section h2 {
-      color: #004080;
-      border-bottom: 3px solid #ffd700;
-      padding-bottom: 5px;
-      margin-bottom: 10px;
-      font-size: 22px;
-    }
+        .review-form button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 1em;
+        }
 
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .profile-card, .profile-section {
-        max-width: 90%;
-      }
-    }
-  </style>
+        .review-form button:hover {
+            background-color: #4cae4c;
+        }
+
+        .disabled-review {
+            color: #999;
+            font-style: italic;
+        }
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .review-actions {
+            position: relative; /* Needed for absolute positioning of dropdown content */
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background-color: transparent;
+            color: #555;
+            padding: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .dropdown {
+          position: relative;
+          display: inline-block;
+        }
+
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          background-color: #f9f9f9;
+          min-width: 160px;
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+          z-index: 1;
+          right: 0; /* Dropdown appears on the right */
+          border-radius: 5px;
+          border: 1px solid #ccc;
+        }
+
+        .dropdown-content button {
+          color: black;
+          padding: 10px 16px;
+          text-decoration: none;
+          display: block;
+          width: 100%;
+          text-align: left;
+          border: none;
+          background-color: transparent;
+          cursor: pointer;
+        }
+
+        .dropdown-content button:hover {
+          background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+          display: block;
+        }
+
+
+        .delete-button {
+            color: red;
+        }
+
+        .report-button {
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Sidebar -->
+    <header>
+        <h1>RATE MY AGGIE</h1>
+    </header>
     <div class="sidebar">
-      <h2>Rate My Aggie</h2>
-      <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/professors">Professors</a></li>
-          {% if session.get('user_id') and session.get('is_moderator') %}
-              <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
-          {% endif %}
-          <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
-      </ul>
-  </div>
-  <div class="main-content">
-    <!-- Search Bar -->
-    <form method="GET" action="/professors">
-      <div class="search-container">
-        <input type="text" name="search_term" id="search_term" value="{{ search_term or '' }}" placeholder="Enter Professor's Name Here">
-        <button type="submit" class="button">Search</button>
-      </div>
-    </form>
-    <!-- Profile Content -->
-    <h1>Rate Your Professor, {{ name }}</h1>
-    <!-- Reviews go below this line-->
-
-     <!-- Display active reviews-->
-      <!-- Prompt Reviews-->
-    <div class="content">
-      <form action="/review" id="review-form" method="post">
-          <label>Select Rating:</label><br>
-          <input type="radio" name="stars" value="1"> 1 star
-          <input type="radio" name="stars" value="2"> 2 stars
-          <input type="radio" name="stars" value="3"> 3 stars
-          <input type="radio" name="stars" value="4"> 4 stars
-          <input type="radio" name="stars" value="5"> 5 stars
-          <input type="hidden" name="prof_id" value="{{ professor_id }}"/>
-          <input type="hidden" name="prof_name" value="{{ name }}"/>
-          <br>
-
-          <input type="text" id="comment" name="comment" class="comment-box" placeholder="Enter your review here">
-          <br/>
-          <button type="submit">Submit</button>
-      </form>
-      <!-- For Every Review, Display it-->
-      {% for review in reviews %}
-        <div class="professor-box">
-            <p class="professor-id">Professor ID: {{ review.professor_id }}</p>
-            <p>{{ review.review}}</p>
+        <div style="padding: 1rem; text-align: center;">
+            <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
         </div>
-      {% endfor %}
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/professors">Professors</a></li>
+            {% if session.get('user_id') and session.get('is_moderator') %}
+                <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
+        </ul>
     </div>
-  </div>
+    <main>
+        <div class="content-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <h1>Professor: {{ name }}</h1>
+
+            <h2>Reviews</h2>
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="review-container">
+                        <div class="review-info">
+                            <span class="star-rating">
+                                {% for _ in range(review.sql_score) %}★{% endfor %}
+                            </span> -
+                            Class Format: {{ review.class_format }} -
+                            Posted on: {{ review.created_at }}
+                             <div class="review-actions">  {# New div for the dropdown #}
+                                <div class="dropdown">
+                                    <button class="dropbtn">...</button>  {# Three-dot button #}
+                                    <div class="dropdown-content">
+                                        {% if session['user_id'] == review.user_id or session.get('is_moderator') %}
+                                            <form method="POST" action="{{ url_for('delete_review', review_id=review.review_id) }}"
+                                                  onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                                <button type="submit" class="delete-button">Delete</button>
+                                            </form>
+                                        {% endif %}
+                                        <form method="POST" action="{{ url_for('report_review', review_id=review.review_id) }}">
+                                            <button type="submit" class="report-button">Report</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="review-text">{{ review.review }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No reviews yet for {{ name }}.</p>
+            {% endif %}
+
+            {% if session.get('user_id') %}
+                {% if is_review_allowed %}
+                    <h2>Leave a Review for {{ name }}</h2>
+                    <form class="review-form" method="POST" action="{{ url_for('review') }}">
+                        <label for="stars">Rating:</label>
+                        <select name="stars" id="stars">
+                            <option value="5">★★★★★</option>
+                            <option value="4">★★★★☆</option>
+                            <option value="3">★★★☆☆</option>
+                            <option value="2">★★☆☆☆</option>
+                            <option value="1">★☆☆☆☆</option>
+                        </select><br><br>
+
+                        <label>Class Format:</label>
+                        <div class="radio-group">
+                            <input type="radio" id="in_person" name="class_format" value="in person" required>
+                            <label for="in_person">In Person</label>
+                            <input type="radio" id="online" name="class_format" value="online" required>
+                            <label for="online">Online</label>
+                        </div><br>
+
+                        <label for="comment">Your Review:</label>
+                        <textarea id="comment" name="comment" rows="5" required></textarea><br>
+
+                        <input type="hidden" name="prof_id" value="{{ professor_id }}">
+                        <input type="hidden" name="prof_name" value="{{ name }}">
+                        <button type="submit" class="button">Submit Review</button>
+                    </form>
+                {% else %}
+                    <p class="disabled-review">You can only review professors you have taken.</p>
+                {% endif %}
+            {% else %}
+                <p>Please <a href="/">log in</a> to leave a review.</p>
+            {% endif %}
+        </div>
+    </main>
 </body>
 </html>
