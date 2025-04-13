@@ -87,7 +87,7 @@ def moderator(user_id):
     return user and user.moderator
 
 # auto moderation features (these seem fine as they are)
-flagged_words = {'fuck', 'fucking', 'bitch', 'shit', 'pussy', 'nigga', 'hell', 'ass'}
+flagged_words = {' fuck ', ' fucking ', ' bitch ', ' shit ', ' pussy ', ' nigga ', ' hell ', ' ass ', ' asshole ', ' dick ', 'dickhead '}
 
 def contains_flagged_words(text):
     return any(word in text.lower() for word in flagged_words)
