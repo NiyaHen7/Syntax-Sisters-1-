@@ -9,7 +9,7 @@
         body {
             font-family: sans-serif;
             margin: 0;
-            display: flex; /* Use flexbox for the main layout (sidebar and content) */
+            display: flex;
             min-height: 100vh;
         }
         header {
@@ -19,11 +19,10 @@
             text-align: left;
             width: 100%;
             flex-shrink: 0;
-            /* Position it at the top */
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 10; /* Ensure header is above sidebar */
+            z-index: 10;
         }
         header h1 {
             margin: 0;
@@ -41,10 +40,9 @@
             top: 0;
             left: 0;
             overflow-y: auto;
-            /* Add padding-top to avoid overlap with the fixed header */
-            padding-top: 4rem; /* Adjust this value based on your header's height + padding */
+            padding-top: 4rem;
         }
-        .sidebar > div { /* Style the logo container */
+        .sidebar > div {
             padding: 1rem;
             text-align: center;
         }
@@ -77,10 +75,8 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            /* Add margin-left to push main content to the right of the fixed sidebar */
             margin-left: 200px;
-            /* Add padding-top to avoid overlap with the fixed header */
-            padding-top: 4rem; /* Adjust this value to match sidebar's padding-top */
+            padding-top: 4rem;
         }
         main .content-wrapper {
             background-color: white;
@@ -103,18 +99,16 @@
             background-color: #222;
         }
         input, textarea, select {
-            width: calc(100% - 1.5rem); /* Adjust for padding */
+            width: calc(100% - 1.5rem);
             padding: 0.75rem;
             margin-bottom: 1rem;
             border-radius: 8px;
             border: 1px solid #ccc;
         }
-        /* Profile Content */
         .highlight {
             color: #ffd700;
         }
 
-        /* Profile Card */
         .profile-card {
             background: linear-gradient(135deg, #eef4ff, #dce6ff);
             padding: 25px;
@@ -147,7 +141,6 @@
             color: #333;
         }
 
-        /* Profile Sections */
         .profile-section {
             margin-top: 20px;
             padding: 20px;
@@ -167,7 +160,6 @@
             font-size: 22px;
         }
 
-        /* Responsive Design (You might need to adjust this based on the new layout) */
         @media (max-width: 768px) {
             .profile-card, .profile-section {
                 max-width: 90%;
@@ -184,9 +176,9 @@
             margin-bottom: 8px;
             font-size: 0.9em;
             color: #777;
-             display: flex; /* Use flexbox for layout */
-            justify-content: space-between; /* Space between info and actions */
-            align-items: center; /* Vertically center items */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .review-text {
@@ -199,7 +191,7 @@
         }
 
         .review-actions {
-            position: relative; /* Needed for absolute positioning of dropdown content */
+            position: relative;
             display: inline-block;
         }
 
@@ -213,42 +205,41 @@
         }
 
         .dropdown {
-          position: relative;
-          display: inline-block;
+            position: relative;
+            display: inline-block;
         }
 
         .dropdown-content {
-          display: none;
-          position: absolute;
-          background-color: #f9f9f9;
-          min-width: 160px;
-          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-          z-index: 1;
-          right: 0; /* Dropdown appears on the right */
-          border-radius: 5px;
-          border: 1px solid #ccc;
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            right: 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
 
         .dropdown-content button {
-          color: black;
-          padding: 10px 16px;
-          text-decoration: none;
-          display: block;
-          width: 100%;
-          text-align: left;
-          border: none;
-          background-color: transparent;
-          cursor: pointer;
+            color: black;
+            padding: 10px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
         }
 
         .dropdown-content button:hover {
-          background-color: #ddd;
+            background-color: #ddd;
         }
 
         .dropdown:hover .dropdown-content {
-          display: block;
+            display: block;
         }
-
 
         .delete-button {
             color: red;
@@ -257,6 +248,7 @@
         .report-button {
             color: #333;
         }
+
         .alert {
             padding: 10px;
             margin-bottom: 15px;
@@ -275,12 +267,14 @@
             color: #155724;
             border-color: #c3e6cb;
         }
+
         .search-container {
             margin-bottom: 1rem;
             display: flex;
             gap: 0.5rem;
             align-items: center;
         }
+
         .search-container input[type="text"] {
             flex-grow: 1;
         }
@@ -291,18 +285,18 @@
         <h1>RATE MY AGGIE</h1>
     </header>
     <div class="sidebar">
-      <div style="padding: 1rem; text-align: center;">
-          <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
-      </div>
-      <ul>
-          <li><a href="/home">Home</a></li>
-          <li><a href="/professors">Professors</a></li>
-          {% if session.get('user_id') and session.get('is_moderator') %}
-              <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
-          {% endif %}
-          <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
-      </ul>
-  </div>
+        <div style="padding: 1rem; text-align: center;">
+            <img src="{{ url_for('static', filename='images/rma-navy.png') }}" alt="RMA Logo" style="width: 80%; max-width: 150px; height: auto;">
+        </div>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/professors">Professors</a></li>
+            {% if session.get('user_id') and session.get('is_moderator') %}
+                <li><a href="{{ url_for('moderation_page') }}">Moderation</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('student_profile') }}">Student Profile</a></li>
+        </ul>
+    </div>
     <main>
         <div class="content-wrapper">
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -316,12 +310,7 @@
             {% endwith %}
             <h1>Welcome to Your Profile, <span class="highlight">{{ user.username }}</span></h1>
 
-            <div class="profile-card">
-                <div class="profile-img"></div>
-                <p><strong>Email:</strong> {{ user.email }}</p>
-                <p><strong>Major:</strong> {{ user.major }}</p>
-                <p><strong>Graduation Year:</strong> {{ user.grad_year }}</p>
-            </div>
+            <!-- Removed .profile-card block -->
 
             <div class="profile-section">
                 <h2>Your Reviews</h2>
@@ -334,9 +323,9 @@
                                     {% for _ in range(review.sql_score) %}★{% endfor %}
                                 </span>
                                 Posted on: {{ review.created_at }}
-                                 <div class="review-actions">  {# New div for the dropdown #}
+                                <div class="review-actions">
                                     <div class="dropdown">
-                                        <button class="dropbtn">...</button>  {# Three-dot button #}
+                                        <button class="dropbtn">...</button>
                                         <div class="dropdown-content">
                                             {% if session['user_id'] == review.user_id or session.get('is_moderator') %}
                                                 <form method="POST" action="{{ url_for('delete_review', review_id=review.review_id) }}"
@@ -363,3 +352,4 @@
     </main>
 </body>
 </html>
+
