@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "ejs": "^3.1.10",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "railway": "^2.0.17"
   },
   "engines": {
     "node": ">=14.0.0"
