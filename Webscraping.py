@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask_talisman import Talisman
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -468,5 +469,8 @@ def dismiss_review(review_id):
         flash(f"Error dismissing review: {str(e)}", "error")
     return redirect(request.referrer)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Running the Flask app
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
