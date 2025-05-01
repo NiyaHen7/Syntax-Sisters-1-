@@ -1,2 +1,23 @@
-.vercel
+# Windows-specific files
+Thumbs.db
+Desktop.ini
+
+# VS Code settings (if using VS Code)
+.vscode/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment directories
 venv/
+env/
+.venv/
+
+# Flask environment files
+instance/
+.env
+
+# OS generated files
+.DS_Store

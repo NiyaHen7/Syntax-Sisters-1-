@@ -1,0 +1,21 @@
+name = "flask-app"
+
+[build]
+  builder = "python3"  # Python builder, typically it will figure this out automatically.
+
+  [build.env]
+  # Declare environment variables that nixpacks will use
+  DATABASE_URL = "postgresql://postgres:wrocDJvJZYmYShWtBHVFgGemQxKjgtvu@hopper.proxy.rlwy.net:31811/railway
+PGHOST=hopper.proxy.rlwy.net"
+  FLASK_APP = "webscraping.py"  # Specify your app entry point file
+
+  [build.packages]
+  # Add any additional packages required for your environment (e.g., build tools)
+  python3 = "python3"
+
+  # Optional - install the `libpq-dev` package for PostgreSQL client
+  libpq-dev = "libpq-dev"
+
+[deploy]
+  # The web server to run your Flask app (e.g., Gunicorn for production)
+  web = "gunicorn --bind 0.0.0.0:$PORT webscraping:app"
